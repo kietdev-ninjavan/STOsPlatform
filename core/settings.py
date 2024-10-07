@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # STOs's App
     'stos.apps.StosConfig',
+    'google_wrapper.apps.GoogleWrapperConfig',
 ]
 
 MIDDLEWARE = [
