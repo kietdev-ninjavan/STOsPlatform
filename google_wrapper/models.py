@@ -2,7 +2,7 @@ import json
 
 from django.db import models
 
-from core.base import BaseModel
+from core.base.model import BaseModel
 from stos.utils import encrypt_value, decrypt_value
 
 

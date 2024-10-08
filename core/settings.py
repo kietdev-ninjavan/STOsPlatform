@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    # Libraries
+    'django_celery_beat',
+    'django_celery_results',
     # STOs's App
     'stos.apps.StosConfig',
     'google_wrapper.apps.GoogleWrapperConfig',
@@ -118,11 +120,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Ho_Chi_Minh'
+TIME_ZONE = config('TIME_ZONE', default='UTC')
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = config('USE_TZ', default=True, cast=bool)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -148,6 +150,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User Model
 AUTH_USER_MODEL = 'stos.User'
 
+# Notification settings
+NOTIFICATION_WEBHOOK = config('NOTIFICATION_WEBHOOK_URL', default=None)
+
 # region Email settings
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -161,6 +166,21 @@ else:
 
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 # endregion Email settings
+
+# region Celery settings
+# Celery
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = USE_TZ
+CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_EXTENDED = True
+CELERY_TASK_DEFAULT_RETRY_DELAY = 30
+CELERY_TASK_MAX_RETRIES = 3
+# Celery Beat
+DJANGO_CELERY_BEAT_TZ_AWARE = False
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+# endregion Celery settings
 
 # region Logging
 LOG_PATH = config('LOG_PATH', default=BASE_DIR)

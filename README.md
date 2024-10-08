@@ -1,8 +1,9 @@
 <h1 align="center">Platform of STOs Team</h1>
 
 <p align="center">
-    <a href="https://www.python.org/downloads/release/python-31110/"><img alt="Python versions" src="https://img.shields.io/badge/python-3.11.10-blue"></a>
-    <a href="https://docs.djangoproject.com/en/5.1/"><img alt="Documentation" src="https://img.shields.io/badge/django-5.1.1-darkgreen"></a>
+   <a href="https://www.python.org/downloads/release/python-31110/"><img alt="Python versions" src="https://img.shields.io/badge/python-3.11.10-blue"></a>
+   <a href="https://docs.djangoproject.com/en/5.1/"><img alt="Documentation" src="https://img.shields.io/badge/django-5.1.1-darkgreen"></a>
+   <a href="https://docs.celeryq.dev/en/v5.4.0/"><img alt="Documentation" src="https://img.shields.io/badge/celery-5.4.0-lightgreen"></a>
 </p>
 
 # Introduction
@@ -30,10 +31,14 @@ tasks and automating processes, reducing manual effort and minimizing errors.
    ```bash
    flake8 .
    ```
+
 ---
+
 # Running the Project
 
 To run the project locally, follow the steps below:
+
+---
 
 ## Django Server
 
@@ -82,6 +87,45 @@ To run the project locally, follow the steps below:
     ```bash
     python manage.py runserver
     ```
+
 ---
+
+## Celery
+
+### Running Celery Worker
+
+- On Windows, you can use the following command to start Celery:
+   ```bash
+   celery -A core worker --pool=solo -E --concurrency=10 --hostname=worker_name
+   ```
+- On Linux, you can use the following command to start Celery:
+   ```bash
+   celery -A core worker --pool=prefork -E --concurrency=10 --hostname=worker_name
+   ```
+
+#### Parameters Explanation
+
+- `--pool`: Specifies the concurrency pool type that Celery should use to handle tasks.
+    - `prefork`: (default): Uses multiple child processes to handle tasks in parallel.
+    - `solo`: Runs tasks synchronously, one at a time, in the main process. This is useful for debugging but not for
+      production.
+    - `eventlet`: Uses green threads, useful for I/O-bound tasks.
+    - `gevent`: Similar to eventlet, optimized for network I/O-bound tasks.
+
+- `--concurrency`: Sets the number of concurrent worker processes or threads to handle tasks in parallel.
+    - NOTE: If using --pool=solo, concurrency is always 1.
+- `--hostname (or -n)`: Set custom hostname for the worker instance.
+- `-E`: nables event tracking so that tasks are stored in the result backend, allowing for real-time monitoring with
+  tools like Flower.
+
+### Running Celery Beat
+
+- All Platforms
+   ```bash
+   celery -A core beat
+   ```
+
+---
+
 # For any questions, please contact System Ops Team Vietnam. Thank you!
    
