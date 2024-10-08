@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from simple_history.models import HistoricalRecords
 
 
 class ActiveManager(models.Manager):
@@ -12,7 +13,9 @@ class ActiveManager(models.Manager):
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
-    delete_at = models.DateTimeField(null=True)  # Soft delete field
+    delete_at = models.DateTimeField(null=True)
+
+    history = HistoricalRecords(inherit=True)
 
     objects = ActiveManager()  # Custom manager to handle active (non-deleted) objects
     all_objects = models.Manager()  # Default manager to access all objects including soft-deleted ones

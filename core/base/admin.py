@@ -1,9 +1,9 @@
-from django.contrib import admin
-from django.utils import timezone
 from django.contrib import messages
+from django.utils import timezone
+from simple_history.admin import SimpleHistoryAdmin
 
 
-class BaseAdmin(admin.ModelAdmin):
+class BaseAdmin(SimpleHistoryAdmin):
     """
     Base admin class to handle soft-delete functionality in Django admin.
     """
