@@ -23,3 +23,19 @@ class ExtendedPeriodicTask(PeriodicTask, BaseModel):
     class Meta:
         verbose_name = 'Tool Periodic Task'
         verbose_name_plural = 'Tool Periodic Tasks'
+
+
+class Holiday(BaseModel):
+    name = models.CharField(max_length=255, help_text="The name of the holiday.")
+    date = models.DateField(unique=True, help_text="The date of the holiday.")
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"
+
+    class Meta:
+        ordering = ['date']
+        verbose_name = 'Holiday'
+        verbose_name_plural = 'Holidays'
+        indexes = [
+            models.Index(fields=['date']),
+        ]

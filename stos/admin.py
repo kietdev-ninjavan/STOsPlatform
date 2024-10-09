@@ -15,7 +15,7 @@ from django_celery_beat.models import (
 )
 
 from core.base.admin import BaseAdmin
-from .models import ExtendedPeriodicTask, User
+from .models import ExtendedPeriodicTask, User, Holiday
 
 
 class STOsPlatformAdminSite(admin.AdminSite):
@@ -76,10 +76,11 @@ class CreatedByFilter(admin.SimpleListFilter):
         return queryset
 
 
-class ExtendedPeriodicTaskAdmin(PeriodicTaskAdmin, BaseAdmin):
-    list_display = PeriodicTaskAdmin.list_display + ('created_by', 'get_tags')
-    list_filter = [CreatedByFilter, TagsFilter, 'enabled', 'one_off', 'created_date']
+class ExtendedPeriodicTaskAdmin(BaseAdmin, PeriodicTaskAdmin):
+    list_display = PeriodicTaskAdmin.list_display + ('created_by', 'get_tags') + BaseAdmin.list_display
+    list_filter = [CreatedByFilter, TagsFilter, 'enabled', 'one_off', 'created_date'] + BaseAdmin.list_filter
     search_fields = PeriodicTaskAdmin.search_fields + ('tags', 'created_date')
+    actions = PeriodicTaskAdmin.actions + BaseAdmin.actions
     fieldsets = PeriodicTaskAdmin.fieldsets + (
         (None, {'fields': ('tags',)}),
     )
@@ -101,4 +102,17 @@ stos_platform_admin.register(IntervalSchedule, IntervalScheduleAdmin)
 stos_platform_admin.register(CrontabSchedule, CrontabScheduleAdmin)
 stos_platform_admin.register(SolarSchedule, SolarScheduleAdmin)
 stos_platform_admin.register(ClockedSchedule, ClockedScheduleAdmin)
+
+
+# endregion
+
+# region Holiday
+class HolidayAdmin(BaseAdmin):
+    list_display = ('name', 'date',) + BaseAdmin.list_display
+    list_filter = ['date', ] + BaseAdmin.list_filter
+    search_fields = ('name',)
+    ordering = ['date']
+
+
+stos_platform_admin.register(Holiday, HolidayAdmin)
 # endregion
