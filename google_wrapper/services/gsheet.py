@@ -142,6 +142,35 @@ class GoogleSheetService:
             raise ValueError("Worksheet must be an int (GID), str (name), or gspread.Worksheet.")
 
     @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def read_cell(self, cell: Union[str, Tuple[int, int]], worksheet: Union[int, str, gspread.Worksheet]) -> str:
+        """
+        Read the value of a specific cell in the worksheet.
+
+        Args:
+            cell (Union[str, Tuple[int, int]]): The cell to read (as A1 notation or (col, row) tuple).
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to read from.
+
+        Returns:
+            str: The value of the cell.
+
+        Raises:
+            ValueError: If the worksheet is not a recognized type.
+            APIError: If an API error occurs during the read.
+        """
+        worksheet = self.get_worksheet(worksheet)
+
+        # Convert (col, row) tuple to A1 notation if needed
+        if isinstance(cell, tuple):
+            cell = utils.rowcol_to_a1(cell[1], cell[0])
+
+        try:
+            value = worksheet.acell(cell).value
+            self.__logger.info(f"Read cell '{cell}' in worksheet '{worksheet.title}'.")
+            return value
+        except APIError as error:
+            self.__handle_api_error(error)
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
     def update_cell(self, cell: Union[str, Tuple[int, int]], value: str,
                     worksheet: Union[int, str, gspread.Worksheet]) -> None:
         """

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     # STOs's App
     'stos.apps.StosConfig',
     'google_wrapper.apps.GoogleWrapperConfig',
+    'opv2.apps.OpV2Config',
 ]
 
 MIDDLEWARE = [
@@ -144,6 +145,16 @@ STORAGES = {
     },
 }
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('CACHES_REDIS_URL', default='redis://localhost:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
@@ -183,6 +194,11 @@ CELERY_TASK_MAX_RETRIES = 3
 DJANGO_CELERY_BEAT_TZ_AWARE = False
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # endregion Celery settings
+
+PLATFORM_GG_ACCOUNT_SERVICE_ID = config('PLATFORM_GG_ACCOUNT_SERVICE_ID', default=None)
+PLATFORM_CONFIG_SPREADSHEET_ID = config('PLATFORM_CONFIG_SPREADSHEET_ID', default=None)
+PLATFORM_WORKSHEET_ID = config('PLATFORM_WORKSHEET_ID', default=None, cast=int)
+PLATFORM_CELL_TOKEN = config('PLATFORM_CELL_TOKEN', default=None)
 
 # region Logging
 LOG_PATH = config('LOG_PATH', default=BASE_DIR)
