@@ -25,6 +25,28 @@ class ExtendedPeriodicTask(PeriodicTask, BaseModel):
         verbose_name_plural = 'Tool Periodic Tasks'
 
 
+class Config(BaseModel):
+    key = models.CharField(max_length=255, unique=True, help_text="The key of the configuration.")
+    value = models.TextField(help_text="The value of the configuration.")
+    tags = models.TextField(blank=True, null=True, help_text="Tags to categorize the task, separated by commas")
+
+    def get_tags(self):
+        return self.tags.split(',') if self.tags else []
+
+    def set_tags(self, tags_list):
+        self.tags = ','.join(tags_list)
+
+    def __str__(self):
+        return f"{self.key} = {self.value}"
+
+    class Meta:
+        verbose_name = 'Configuration'
+        verbose_name_plural = 'Configurations'
+        indexes = [
+            models.Index(fields=['key']),
+        ]
+
+
 class Holiday(BaseModel):
     name = models.CharField(max_length=255, help_text="The name of the holiday.")
     date = models.DateField(unique=True, help_text="The date of the holiday.")

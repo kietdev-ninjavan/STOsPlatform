@@ -30,7 +30,7 @@ class BaseAdmin(SimpleHistoryAdmin):
     """
     Base admin class to handle soft-delete functionality in Django admin.
     """
-    list_display = ('__str__', 'is_deleted', 'delete_at')  # Display soft delete status
+    list_display = ('is_deleted', 'delete_at')  # Display soft delete status
     list_filter = [SoftDeleteFilter, ]  # Add filter for active/soft deleted items
     actions = ('delete_queryset', 'restore_selected')
 
