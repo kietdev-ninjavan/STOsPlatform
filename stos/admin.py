@@ -88,6 +88,22 @@ class CreatedByFilter(admin.SimpleListFilter):
         return queryset
 
 
+class YearFilter(admin.SimpleListFilter):
+    title = 'Year'
+    parameter_name = 'year'
+
+    def lookups(self, request, model_admin):
+        # Get distinct years from the 'date' field
+        years = Holiday.objects.dates('date', 'year')
+        return [(year.year, year.year) for year in years]
+
+    def queryset(self, request, queryset):
+        # Filter the queryset by the selected year
+        if self.value():
+            return queryset.filter(date__year=self.value())
+        return queryset
+
+
 # endregion
 
 
@@ -131,7 +147,7 @@ stos_platform_admin.register(ClockedSchedule, ClockedScheduleAdmin)
 class HolidayAdmin(BaseAdmin):
     """Admin customization for Holiday model."""
     list_display = ('name', 'date',) + BaseAdmin.list_display
-    list_filter = ['date', ] + BaseAdmin.list_filter
+    list_filter = ['date', YearFilter] + BaseAdmin.list_filter
     search_fields = ('name',)
     ordering = ['date']
 
@@ -146,7 +162,7 @@ stos_platform_admin.register(Holiday, HolidayAdmin)
 class ConfigAdmin(BaseAdmin):
     """Admin customization for Config model."""
     list_display = ('key', 'value', 'get_tags') + BaseAdmin.list_display
-    list_filter = ['key', 'tags'] + BaseAdmin.list_filter
+    list_filter = ['key', ConfigTagsFilter] + BaseAdmin.list_filter
     search_fields = ('key', 'value',)
 
     def get_tags(self, obj):
