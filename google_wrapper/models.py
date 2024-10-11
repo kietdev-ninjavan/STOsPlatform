@@ -8,7 +8,7 @@ from stos.utils import encrypt_value, decrypt_value
 
 class ServiceAccount(BaseModel):
     type = models.CharField(max_length=255, default="service_account")
-    name = models.CharField(max_length=255, db_index=True)
+    name = models.CharField(max_length=255, db_index=True, unique=True)
     project_id = models.CharField(max_length=255)
     private_key_id = models.CharField(max_length=255, primary_key=True)
     _private_key = models.TextField(db_column='private_key')  # Encrypted field
@@ -43,6 +43,14 @@ class ServiceAccount(BaseModel):
         """Override save method to ensure private_key is encrypted."""
         if not self._private_key:
             raise ValueError("Private key must be set.")
+
+        # auto encrypt private_key
+        if self._private_key:
+            self._private_key = encrypt_value(self._private_key)
+
+        # name auto
+        self.name = self.client_email.split('@')[0]
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -68,3 +76,8 @@ class ServiceAccount(BaseModel):
     def to_json(self):
         """Custom method to return a JSON representation of the model, with decrypted private_key."""
         return json.dumps(self.to_dict())
+
+    class Meta:
+        verbose_name = "Google Service Account"
+        verbose_name_plural = "Google Service Accounts"
+        ordering = ('project_id', 'client_email')

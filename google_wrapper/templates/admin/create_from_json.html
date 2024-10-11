@@ -1,0 +1,18 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h1>Update Or Create Google Service Accounts from JSON</h1>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="form-group mb-3">
+                <label for="json_file">Upload JSON file:</label>
+                <input type="file" class="form-control" name="json_file" id="json_file" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Upload and Create</button>
+        </form>
+    </div>
+{% endblock %}
