@@ -54,7 +54,7 @@ class ServiceAccount(BaseModel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"Google Service Account: {self.project_id} ({self.client_email})"
+        return f"GSA: {self.name} ({self.project_id})"
 
     def to_dict(self):
         """Custom method to return a dictionary representation of the model, with decrypted private_key."""

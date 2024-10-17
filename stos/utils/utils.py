@@ -1,19 +1,21 @@
 import os
 from datetime import datetime
-from typing import List, Any, Dict, Optional
+from itertools import islice
+from typing import Dict, Optional
+from typing import List, Any, Generator
 from unicodedata import normalize
 
 
-def chunk_list(input_list: List[Any], chunk_size: int = 1000) -> List[List[Any]]:
+def chunk_list(input_list: List[Any], chunk_size: int = 1000) -> Generator[List[Any], None, None]:
     """
-    Splits a list into smaller lists (chunks) of a specified size.
+    Splits a list into smaller lists (chunks) of a specified size using a generator.
 
     Args:
         input_list (List[Any]): The list to be chunked.
         chunk_size (int): The size of each chunk. Defaults to 1000.
 
-    Returns:
-        List[List[Any]]: A list of lists, where each inner list is a chunk of the original list.
+    Yields:
+        Generator[List[Any], None, None]: A generator of lists, where each list is a chunk of the original list.
 
     Raises:
         ValueError: If chunk_size is less than 1.
@@ -21,19 +23,24 @@ def chunk_list(input_list: List[Any], chunk_size: int = 1000) -> List[List[Any]]
     if chunk_size < 1:
         raise ValueError("chunk_size must be greater than 0")
 
-    return [input_list[i:i + chunk_size] for i in range(0, len(input_list), chunk_size)]
+    it = iter(input_list)
+    while True:
+        chunk = list(islice(it, chunk_size))
+        if not chunk:
+            break
+        yield chunk
 
 
-def chunk_dict(input_dict: Dict[Any, Any], chunk_size: int = 1000) -> List[Dict[Any, Any]]:
+def chunk_dict(input_dict: Dict[Any, Any], chunk_size: int = 1000) -> Generator[Dict[Any, Any], None, None]:
     """
-    Splits a dictionary into smaller dictionaries (chunks) of a specified size.
+    Splits a dictionary into smaller dictionaries (chunks) of a specified size using a generator.
 
     Args:
-        input_dict (dict): The dictionary to be chunked.
+        input_dict (Dict[Any, Any]): The dictionary to be chunked.
         chunk_size (int): The size of each chunk. Defaults to 1000.
 
-    Returns:
-        List[dict]: A list of dictionaries, where each dictionary is a chunk of the original dictionary.
+    Yields:
+        Generator[Dict[Any, Any], None, None]: A generator of dictionaries, where each dictionary is a chunk of the original dictionary.
 
     Raises:
         ValueError: If chunk_size is less than 1.
@@ -41,8 +48,12 @@ def chunk_dict(input_dict: Dict[Any, Any], chunk_size: int = 1000) -> List[Dict[
     if chunk_size < 1:
         raise ValueError("chunk_size must be greater than 0")
 
-    return [{k: input_dict[k] for k in list(input_dict.keys())[i:i + chunk_size]}
-            for i in range(0, len(input_dict), chunk_size)]
+    it = iter(input_dict.items())
+    while True:
+        chunk = dict(islice(it, chunk_size))
+        if not chunk:
+            break
+        yield chunk
 
 
 def text_in_text(sub_text: str, main_text: str) -> bool:
@@ -110,7 +121,14 @@ def parse_datetime(date_string: str, custom_formats: Optional[List[str]] = None)
         "%Y/%m/%d %H:%M:%S",  # Date and time
         "%d/%m/%Y %H:%M:%S",  # Date and time
         "%m-%d-%Y %H:%M:%S",  # Date and time
-        "%d-%m-%Y %H:%M:%S"  # Date and time
+        "%d-%m-%Y %H:%M:%S",  # Date and time
+        "%B %d, %Y %H:%M:%S",  # Date and time (e.g., 'September 12, 2024 14:30:00')
+        "%Y-%m-%d %H:%M",  # Date and time without seconds
+        "%m/%d/%Y %H:%M",  # Date and time without seconds
+        "%Y/%m/%d %H:%M",  # Date and time without seconds
+        "%d/%m/%Y %H:%M",  # Date and time without seconds
+        "%m-%d-%Y %H:%M",  # Date and time without seconds
+        "%d-%m-%Y %H:%M",  # Date and time without seconds
     ]
 
     # Add custom formats if provided
@@ -124,3 +142,5 @@ def parse_datetime(date_string: str, custom_formats: Optional[List[str]] = None)
             continue
 
     raise ValueError(f"Date string '{date_string}' does not match any of the expected formats.")
+
+

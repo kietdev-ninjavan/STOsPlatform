@@ -1,6 +1,6 @@
 import logging
 from random import randint
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, List, Dict
 
 import gspread
 from gspread import utils
@@ -119,7 +119,7 @@ class GoogleSheetService:
         except APIError as error:
             self.__handle_api_error(error)
 
-    def get_worksheet(self, worksheet: Union[int, str, gspread.Worksheet]) -> gspread.Worksheet:
+    def __get_worksheet(self, worksheet: Union[int, str, gspread.Worksheet]) -> gspread.Worksheet:
         """
         Retrieve a worksheet based on an identifier (GID, name, or direct worksheet object).
 
@@ -157,7 +157,7 @@ class GoogleSheetService:
             ValueError: If the worksheet is not a recognized type.
             APIError: If an API error occurs during the read.
         """
-        worksheet = self.get_worksheet(worksheet)
+        worksheet = self.__get_worksheet(worksheet)
 
         # Convert (col, row) tuple to A1 notation if needed
         if isinstance(cell, tuple):
@@ -185,7 +185,7 @@ class GoogleSheetService:
             ValueError: If the worksheet is not a recognized type.
             APIError: If an API error occurs during the update.
         """
-        worksheet = self.get_worksheet(worksheet)
+        worksheet = self.__get_worksheet(worksheet)
 
         # Convert (col, row) tuple to A1 notation if needed
         if isinstance(cell, tuple):
@@ -215,7 +215,7 @@ class GoogleSheetService:
             ValueError: If the worksheet type is invalid.
             Exception: If an error occurs during the update.
         """
-        worksheet = self.get_worksheet(worksheet)
+        worksheet = self.__get_worksheet(worksheet)
 
         # Set the start row if not provided
         if not start_row:
@@ -253,3 +253,28 @@ class GoogleSheetService:
                 self.__handle_api_error(error)
             except Exception as error:
                 raise error
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def get_all_records(self, worksheet: Union[int, str, gspread.Worksheet]) -> List[Dict[str, Union[int, float, str]]]:
+        """
+        Retrieve all records from the worksheet.
+
+        Args:
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to retrieve records from.
+
+        Returns:
+            list[dict]: A list of dictionaries representing the records.
+
+        Raises:
+            ValueError: If the worksheet is not a recognized type.
+            APIError: If an API error occurs during the read.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            records = worksheet.get_all_records()
+            records = [{k: (None if v == "" else v) for k, v in d.items()} for d in records]
+            self.__logger.info(f"Retrieved all records from worksheet '{worksheet.title}'.")
+            return records
+        except APIError as error:
+            self.__handle_api_error(error)

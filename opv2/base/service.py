@@ -14,6 +14,7 @@ from google_wrapper.services import GoogleSheetService, GoogleChatService
 from google_wrapper.utils.card_builder import CardBuilder
 from google_wrapper.utils.card_builder import widgets as W
 from google_wrapper.utils.card_builder.elements import CardHeader, Section
+from stos.utils import Configs
 
 
 class TokenManager(metaclass=SingletonMeta):
@@ -63,18 +64,19 @@ class TokenManager(metaclass=SingletonMeta):
         Returns:
             str: The token retrieved from the Google Sheet.
         """
+        configs = Configs()
         try:
             service_account = ServiceAccount.objects.get(
-                private_key_id=settings.PLATFORM_GG_ACCOUNT_SERVICE_ID
+                private_key_id=configs.get('SYSTEM_ACCOUNT_SERVICE')
             )
             gsheets_service = GoogleSheetService(
                 service_account=service_account,
-                spreadsheet_id=settings.PLATFORM_CONFIG_SPREADSHEET_ID,
+                spreadsheet_id=configs.get('OPV2_TOKEN_SPREADSHEET_ID'),
                 logger=self.logger
             )
             return gsheets_service.read_cell(
-                cell=settings.PLATFORM_CELL_TOKEN,
-                worksheet=settings.PLATFORM_WORKSHEET_ID
+                cell=configs.get('OPV2_TOKEN_CELL_TOKEN'),
+                worksheet=configs.get('OPV2_TOKEN_WORKSHEET_ID', cast=int)
             )
         except ServiceAccount.DoesNotExist:
             self.logger.error('Service Account not found.')
