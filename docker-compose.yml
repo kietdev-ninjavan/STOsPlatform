@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  web:
+    image: stosplatform:latest
+    command: >
+      sh -c "python manage.py migrate && gunicorn core.wsgi:application --bind 0.0.0.0:8000"
+    ports:
+      - "8080:8000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - CACHES_REDIS_URL=${CACHES_REDIS_URL}
+      - NOTIFICATION_WEBHOOK_URL=${NOTIFICATION_WEBHOOK_URL}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+    networks:
+      - stos-network
+
+  celery-worker:
+    image: stosplatform:latest
+    command: celery -A core worker -E --concurrency=10 --hostname=worker@%h
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - CACHES_REDIS_URL=${CACHES_REDIS_URL}
+      - NOTIFICATION_WEBHOOK_URL=${NOTIFICATION_WEBHOOK_URL}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+    networks:
+      - stos-network
+
+  celery-beat:
+    image: stosplatform:latest
+    command: celery -A core beat
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
+      - CACHES_REDIS_URL=${CACHES_REDIS_URL}
+      - NOTIFICATION_WEBHOOK_URL=${NOTIFICATION_WEBHOOK_URL}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+    networks:
+      - stos-network
+
+networks:
+  stos-network:
+    driver: bridge
