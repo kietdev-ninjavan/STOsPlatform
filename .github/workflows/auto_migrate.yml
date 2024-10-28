@@ -1,0 +1,48 @@
+name: Create Migrations and Release
+
+on:
+  push:
+    branches:
+      - migrations
+
+jobs:
+  create_migrations:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Install required packages for mysqlclient
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+          pkg-config \
+          python3-dev \
+          default-libmysqlclient-dev \
+          build-essential \
+          && sudo apt-get clean \
+          && sudo rm -rf /var/lib/apt/lists/*
+
+      # Step 3: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Step 5: Run makemigrations and commit changes
+      - name: Run makemigrations and commit
+        run: |
+          python manage.py makemigrations
+          git config --local user.name "GitHub Actions"
+          git config --local user.email "actions@github.com"
+          git add .
+          git commit -m "Auto-generate migrations"
+          git push origin migrations

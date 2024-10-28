@@ -70,19 +70,25 @@ To run the project locally, follow the steps below:
    cp env.example .env
    ```
 
-5. Run the migrations:
+5. Create a database (MySQL) and update the database settings in the `.env` file:
+
+    ```sql
+    CREATE DATABASE my_database CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+    ```
+
+6. Run the migrations:
 
     ```bash
     python manage.py makemigrations
     python manage.py migrate
     ```
 
-6. Create a superuser:
+7. Create a superuser:
 
     ```bash
     python manage.py createsuperuser
     ```
-7. Run the development server:
+8. Run the development server:
 
     ```bash
     python manage.py runserver
@@ -126,6 +132,33 @@ To run the project locally, follow the steps below:
    ```
 
 ---
+
+# Flower
+
+### Running Flower
+
+- All Platforms
+   ```bash
+   celery -A core flower
+   ```
+
+# Configuration Each App
+
+Go to admin page and add the configuration for each app
+
+- [OPv2](opv2/README.md)
+
+---
+
+# Docker
+
+Run the following command to build the docker image
+
+## Build Docker Image
+
+```bash
+docker build --no-cache -t stos-platform:latest .
+```
 
 # For any questions, please contact System Ops Team Vietnam. Thank you!
    
