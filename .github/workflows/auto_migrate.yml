@@ -3,7 +3,7 @@ name: Create Migrations and Release
 on:
   push:
     branches:
-      - migrations
+      - main
 
 jobs:
   create_migrations:
