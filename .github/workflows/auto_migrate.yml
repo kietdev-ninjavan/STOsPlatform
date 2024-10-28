@@ -60,7 +60,7 @@ jobs:
           if [ -n "$MIGRATION_FILES" ]; then
             echo "$MIGRATION_FILES" | xargs git add -f
             git commit -m "Auto-generate migrations"
-            git push "https://${GITHUB_TOKEN}@github.com/kietdev-ninjavan/STOsPlatform.git" HEAD:migrations
+            git push "https://${GITHUB_TOKEN}@github.com/kietdev-ninjavan/STOsPlatform.git" HEAD:main
           else
             echo "No changes in migrations to commit"
           fi
