@@ -52,10 +52,13 @@ jobs:
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
-          if [ -n "$(git status --porcelain)" ]; then
-            git add -f */migrations/*.py # Force add migration files
+
+          # Check if there are any untracked or modified files in the migrations folder
+          if [ -n "$(git status --porcelain */migrations/*.py)" ]; then
+            git add -f */migrations/*.py # Force add all migration files
             git commit -m "Auto-generate migrations"
             git push origin migrations
           else
             echo "No changes in migrations to commit"
           fi
+      
