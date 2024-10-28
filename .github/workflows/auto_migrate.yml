@@ -1,4 +1,4 @@
-name: Create Migrations
+name: Create Migrations and Release
 
 on:
   push:
@@ -42,18 +42,18 @@ jobs:
         run: |
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_ENV
 
-      # Step 6: Run makemigrations and check for changes
+      # Step 6: Run makemigrations
       - name: Run makemigrations
         run: |
           python manage.py makemigrations
 
-      # Step 7: Commit and push migrations if there are changes
+      # Step 7: Commit and push migrations, bypassing .gitignore
       - name: Commit and push migrations if any changes
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
           if [ -n "$(git status --porcelain)" ]; then
-            git add .
+            git add -f */migrations/*.py # Force add migration files
             git commit -m "Auto-generate migrations"
             git push origin migrations
           else
