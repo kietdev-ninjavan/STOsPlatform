@@ -1,4 +1,4 @@
-name: Create Migrations and Release
+name: Create Migrations
 
 on:
   push:
@@ -37,16 +37,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      # Step 5: Set up environment variables
       - name: Set up environment variables
         run: |
           echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> $GITHUB_ENV
 
-      # Step 5: Run makemigrations and commit changes
-      - name: Run makemigrations and commit
+      # Step 6: Run makemigrations and check for changes
+      - name: Run makemigrations
         run: |
           python manage.py makemigrations
+
+      # Step 7: Commit and push migrations if there are changes
+      - name: Commit and push migrations if any changes
+        run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
-          git add .
-          git commit -m "Auto-generate migrations"
-          git push origin migrations
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "Auto-generate migrations"
+            git push origin migrations
+          else
+            echo "No changes in migrations to commit"
+          fi
