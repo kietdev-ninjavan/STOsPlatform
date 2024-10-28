@@ -3,12 +3,14 @@ from random import randint
 from typing import Union, Tuple, Optional, List, Dict
 
 import gspread
+import pandas as pd
 from gspread import utils
 from gspread.exceptions import (
     APIError,
     SpreadsheetNotFound,
     WorksheetNotFound
 )
+from gspread_dataframe import get_as_dataframe, set_with_dataframe
 from gspread_formatting import Color, CellFormat, format_cell_range
 from oauth2client.service_account import ServiceAccountCredentials
 from retry import retry
@@ -276,5 +278,101 @@ class GoogleSheetService:
             records = [{k: (None if v == "" else v) for k, v in d.items()} for d in records]
             self.__logger.info(f"Retrieved all records from worksheet '{worksheet.title}'.")
             return records
+        except APIError as error:
+            self.__handle_api_error(error)
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def get_all_records_as_dataframe(self, worksheet: Union[int, str, gspread.Worksheet]) -> pd.DataFrame:
+        """
+        Retrieve all records from the worksheet as a pandas DataFrame using gspread-dataframe.
+
+        Args:
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to retrieve records from.
+
+        Returns:
+            pd.DataFrame: A pandas DataFrame containing the records.
+
+        Raises:
+            ValueError: If the worksheet is not a recognized type.
+            APIError: If an API error occurs during the read.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            # Retrieve the worksheet's content as a DataFrame
+            df = get_as_dataframe(worksheet, evaluate_formulas=True, header=1)  # Adjust header row as needed
+            self.__logger.info(f"Retrieved all records as DataFrame from worksheet '{worksheet.title}'.")
+            return df
+        except APIError as error:
+            self.__handle_api_error(error)
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def get_column(self, worksheet: Union[int, str, gspread.Worksheet], column: Union[int, str]) -> List[str]:
+        """
+        Retrieve a specific column from the worksheet as a list using gspread.
+
+        Args:
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to retrieve the column from.
+            column (Union[int, str]): The column identifier, either as a string (column name) or integer (column index).
+
+        Returns:
+            list[str]: A list containing the values of the specified column.
+
+        Raises:
+            ValueError: If the column is not found or invalid.
+            APIError: If an API error occurs during the read.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            # If the column is specified as a string (A1 notation or header)
+            if isinstance(column, str):
+                # Assuming column is an A1 notation column letter (e.g., 'A', 'B')
+                col_values = worksheet.col_values(utils.a1_to_rowcol(f"{column}1")[1])
+            elif isinstance(column, int):
+                # If column is specified as an integer, retrieve by index (1-based index)
+                col_values = worksheet.col_values(column)
+            else:
+                raise ValueError("Column must be specified as an integer (index) or string (column name).")
+
+            # Optionally remove empty values
+            col_values_cleaned = [value for value in col_values if value.strip()]
+
+            self.__logger.info(f"Retrieved column '{column}' from worksheet '{worksheet.title}'.")
+            return col_values_cleaned
+        except APIError as error:
+            self.__handle_api_error(error)
+        except ValueError as ve:
+            self.__logger.error(f"ValueError: {ve}")
+            raise
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def add_dataframe(self, dataframe: pd.DataFrame, worksheet: Union[int, str, gspread.Worksheet], append: bool = False) -> None:
+        """
+        Add a pandas DataFrame to a worksheet with the option to append or replace the data.
+
+        Args:
+            dataframe (pd.DataFrame): The DataFrame to add.
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to update.
+            append (bool): Whether to append the data to the existing sheet or replace it. Defaults to False (replace).
+
+        Raises:
+            ValueError: If the worksheet type is invalid.
+            APIError: If an API error occurs during the update.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            if append:
+                # Find the next available row
+                existing_rows = len(worksheet.get_all_values())
+                start_row = existing_rows + 1  # Append after the last row
+                set_with_dataframe(worksheet, dataframe, row=start_row, include_column_header=False)
+                self.__logger.info(f"Appended DataFrame to worksheet '{worksheet.title}' starting from row {start_row}.")
+            else:
+                # Replace the entire sheet content with the new DataFrame
+                worksheet.clear()  # Clear existing content
+                set_with_dataframe(worksheet, dataframe, include_column_header=True)
+                self.__logger.info(f"Replaced data in worksheet '{worksheet.title}' with new DataFrame.")
         except APIError as error:
             self.__handle_api_error(error)

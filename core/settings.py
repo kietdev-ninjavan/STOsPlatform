@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'stos.apps.StosConfig',
     'google_wrapper.apps.GoogleWrapperConfig',
     'opv2.apps.OpV2Config',
+    'sla_tool.apps.SlaAccuracyConfig',
+    # 'pre_success.apps.PreSuccessConfig',
 ]
 
 MIDDLEWARE = [
@@ -64,7 +66,10 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'google_wrapper' / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -81,24 +86,17 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
-            'NAME': BASE_DIR / f"{config('DB_NAME', default='db')}.sqlite3",
-        }
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'platform_db',
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default='localhost'),
+        'PORT': config('DB_PORT', default='3306'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': config('DB_ENGINE', default='django.db.backends.mysql'),
-            'NAME': config('DB_NAME'),
-            'USER': config('DB_USER'),
-            'PASSWORD': config('DB_PASSWORD'),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('auto make', default='3306'),
-        }
-    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -167,17 +165,17 @@ AUTH_USER_MODEL = 'stos.User'
 NOTIFICATION_WEBHOOK = config('NOTIFICATION_WEBHOOK_URL', default=None)
 
 # region Email settings
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-    EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-    EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = '587'
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
     EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
 # endregion Email settings
 
 # region Celery settings
@@ -194,11 +192,6 @@ CELERY_TASK_MAX_RETRIES = 3
 DJANGO_CELERY_BEAT_TZ_AWARE = False
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # endregion Celery settings
-
-PLATFORM_GG_ACCOUNT_SERVICE_ID = config('PLATFORM_GG_ACCOUNT_SERVICE_ID', default=None)
-PLATFORM_CONFIG_SPREADSHEET_ID = config('PLATFORM_CONFIG_SPREADSHEET_ID', default=None)
-PLATFORM_WORKSHEET_ID = config('PLATFORM_WORKSHEET_ID', default=None, cast=int)
-PLATFORM_CELL_TOKEN = config('PLATFORM_CELL_TOKEN', default=None)
 
 # region Logging
 LOG_PATH = config('LOG_PATH', default=BASE_DIR)
@@ -244,7 +237,7 @@ LOGGING = {
         },
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': ['console'],
         'level': LOG_LEVEL,
     },
     'loggers': {

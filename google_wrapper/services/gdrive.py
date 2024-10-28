@@ -1,9 +1,12 @@
+import io
 import logging
 from typing import List, Optional
 
+import pandas as pd
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseDownload
 
 from ..dto import FileDTO
 from ..models import ServiceAccount
@@ -11,8 +14,8 @@ from ..models import ServiceAccount
 
 class GoogleDriveService:
     def __init__(self, service_account: ServiceAccount, logger: logging.Logger = logging.getLogger(__name__)):
-        self.__logger = logger
         """Initialize the GoogleDriveService using a GoogleServiceAccount model instance."""
+        self.__logger = logger
         try:
             # Load credentials and create the Drive API client (v3)
             scopes = ['https://www.googleapis.com/auth/drive']
@@ -132,3 +135,34 @@ class GoogleDriveService:
         except Exception as e:
             self.__logger.error(f"Error in get_or_convert_to_google_sheet: {e}")
             raise Exception(f"Error in get_or_convert_to_google_sheet: {e}")
+
+    def csv_get_all_records(self, file_id: str) -> pd.DataFrame:
+        """
+        Download a CSV file from Google Drive and return its content as a Pandas DataFrame.
+
+        :param file_id: The ID of the CSV file on Google Drive.
+        :return: A Pandas DataFrame containing the CSV data.
+        """
+        try:
+            # Request the file content from Google Drive
+            request = self.drive_service.files().get_media(fileId=file_id)
+            file_io = io.BytesIO()
+            downloader = MediaIoBaseDownload(file_io, request)
+
+            done = False
+            while not done:
+                status, done = downloader.next_chunk()
+                self.__logger.info(f"Download {int(status.progress() * 100)}%.")
+
+            # Seek to the start of the file in the buffer
+            file_io.seek(0)
+
+            # Read the CSV file content into a Pandas DataFrame
+            df = pd.read_csv(io.BytesIO(file_io.getvalue()))
+
+            self.__logger.info(f"Successfully retrieved records from CSV file (ID: {file_id}).")
+            return df
+
+        except HttpError as e:
+            self.__logger.error(f"Failed to download or parse CSV file: {e}")
+            raise Exception(f"Failed to download or parse CSV file: {e}")

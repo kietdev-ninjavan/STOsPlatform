@@ -1,9 +1,15 @@
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import List, Dict
 
 
-# DTO Class for File Metadata with MimeType and Extension Mapping
+@dataclass
 class FileDTO:
-    MIME_TYPE_EXTENSION_MAP = {
+    file_id: str
+    name: str
+    mime_type: str
+    parents: List[str] = field(default_factory=list)
+
+    MIME_TYPE_EXTENSION_MAP: Dict[str, str] = field(default_factory=lambda: {
         'application/vnd.google-apps.spreadsheet': 'gs',  # Google Sheet
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',  # Excel file
         'application/zip': 'zip',  # Zip file
@@ -12,21 +18,31 @@ class FileDTO:
         'image/png': 'png',  # PNG image
         'text/plain': 'txt',  # Text file
         # Add more MIME types as needed
-    }
-
-    def __init__(self, file_id: str, name: str, mime_type: str, parents: Optional[List[str]] = None):
-        self.file_id = file_id
-        self.name = name
-        self.mime_type = mime_type
-        self.parents = parents or []
+    })
 
     @property
     def extension(self) -> str:
         """Return the file extension based on the MIME type."""
-        return self.MIME_TYPE_EXTENSION_MAP.get(self.mime_type, '')  # Default to empty string if MIME type is unknown
+        return self.MIME_TYPE_EXTENSION_MAP.get(self.mime_type, 'unknown')  # Return 'unknown' for unknown MIME types
 
     def __repr__(self):
-        return f"FileDTO(file_id='{self.file_id}', name='{self.name}', mime_type='{self.mime_type}', parents={self.parents}, extension='{self.extension}')"
+        return (f"FileDTO(file_id='{self.file_id}', name='{self.name}', "
+                f"mime_type='{self.mime_type}', parents={self.parents}, extension='{self.extension}')")
+
+    @staticmethod
+    def get_extension_from_mime(mime_type: str) -> str:
+        """Static method to get the extension from a MIME type."""
+        mime_type_extension_map = {
+            'application/vnd.google-apps.spreadsheet': 'gs',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+            'application/zip': 'zip',
+            'application/pdf': 'pdf',
+            'image/jpeg': 'jpg',
+            'image/png': 'png',
+            'text/plain': 'txt',
+            # Add more MIME types as needed
+        }
+        return mime_type_extension_map.get(mime_type, 'unknown')
 
     @classmethod
     def from_dict(cls, file_dict: dict):

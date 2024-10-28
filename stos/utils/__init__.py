@@ -5,5 +5,6 @@ from .utils import (
     chunk_list,
     text_in_text,
     clear_temporary_file,
-    parse_datetime
+    parse_datetime,
+    check_record_change
 )

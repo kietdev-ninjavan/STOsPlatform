@@ -2,9 +2,9 @@ import logging
 import threading
 import time
 from abc import ABC
+from typing import Any
 
 import requests
-from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 
@@ -30,10 +30,13 @@ class TokenManager(metaclass=SingletonMeta):
         """
         Initialize the TokenManager with a logger and token lock for thread safety.
         """
-        self.logger = logger
-        self.token_lock = threading.Lock()
+        self.__logger = logger
+        self.__token_lock = threading.Lock()
+        self.__configs = Configs()
+        self.__webhook_url = self.__configs.get('ROOT_NOTIFICATION_WEBHOOK')
 
-    def _build_card(self, header: str, message: str):
+    @staticmethod
+    def _build_card(header: str, message: str):
         """
         Build a Google Chat notification card for token-related messages.
 
@@ -67,22 +70,22 @@ class TokenManager(metaclass=SingletonMeta):
         configs = Configs()
         try:
             service_account = ServiceAccount.objects.get(
-                private_key_id=configs.get('SYSTEM_ACCOUNT_SERVICE')
+                name=configs.get('SYSTEM_ACCOUNT_SERVICE')
             )
             gsheets_service = GoogleSheetService(
                 service_account=service_account,
                 spreadsheet_id=configs.get('OPV2_TOKEN_SPREADSHEET_ID'),
-                logger=self.logger
+                logger=self.__logger
             )
             return gsheets_service.read_cell(
                 cell=configs.get('OPV2_TOKEN_CELL_TOKEN'),
                 worksheet=configs.get('OPV2_TOKEN_WORKSHEET_ID', cast=int)
             )
         except ServiceAccount.DoesNotExist:
-            self.logger.error('Service Account not found.')
+            self.__logger.error('Service Account not found.')
             raise
         except Exception as error:
-            self.logger.error(f'Error reading token from Google Sheet: {error}')
+            self.__logger.error(f'Error reading token from Google Sheet: {error}')
             raise
 
     def token_is_expired(self) -> bool:
@@ -94,7 +97,7 @@ class TokenManager(metaclass=SingletonMeta):
         """
         token = self.token
         if not token:
-            self.logger.info("No token found in cache, assuming expired.")
+            self.__logger.info("No token found in cache, assuming expired.")
             return True
 
         url = "https://walrus.ninjavan.co/vn/aaa/1.0/external/userscopes"
@@ -105,13 +108,13 @@ class TokenManager(metaclass=SingletonMeta):
             response = session.get(url)
             if response.status_code == 200:
                 roles = list(response.json()['vn'].keys())
-                self.logger.info(f"Token is valid with roles: {roles}")
+                self.__logger.info(f"Token is valid with roles: {roles}")
                 return False
             if response.status_code == 401:
-                self.logger.info("Token has expired.")
+                self.__logger.info("Token has expired.")
                 return True
         except requests.RequestException as error:
-            self.logger.error(f"Error checking token expiration: {error}")
+            self.__logger.error(f"Error checking token expiration: {error}")
             return True
         finally:
             session.close()
@@ -121,19 +124,19 @@ class TokenManager(metaclass=SingletonMeta):
         Update the token by retrieving it from Google Sheets.
         Retry until a valid token is fetched and cached.
         """
-        chat_service = GoogleChatService(logger=self.logger)
+        chat_service = GoogleChatService(logger=self.__logger)
         while True:
             card = self._build_card(
                 header='<font color="#de1304">OPv2 Token Expired</font>',
                 message=f'Token: "{self.token}". Please update token in Google Sheet.\nRetrying in 60 seconds.'
             )
-            chat_service.webhook_send(settings.NOTIFICATION_WEBHOOK, card=card)
+            chat_service.webhook_send(self.__webhook_url, card=card)
             try:
-                self.logger.info('Attempting to update token...')
+                self.__logger.info('Attempting to update token...')
                 new_token = self._get_token_from_gsheet()
                 if new_token != self.token:
                     cache.set(self.TOKEN_CACHE_KEY, new_token, timeout=self.TOKEN_CACHE_TIMEOUT)
-                    self.logger.info('Token successfully updated and cached.')
+                    self.__logger.info('Token successfully updated and cached.')
 
                     # Check if the token is valid
                     if not self.token_is_expired():
@@ -141,15 +144,17 @@ class TokenManager(metaclass=SingletonMeta):
                             header='<font color="#38761d">OPv2 Token Updated</font>',
                             message=f'Updated token: "{new_token}".'
                         )
-                        chat_service.webhook_send(settings.NOTIFICATION_WEBHOOK, card=card)
+                        chat_service.webhook_send(self.__webhook_url, card=card)
                         break
                     else:
-                        self.logger.error('Token not change. update again.')
+                        self.__logger.error('Token not change. update again.')
             except Exception as error:
-                self.logger.error(f'Error updating token: {error}')
+                self.__logger.error(f'Error updating token: {error}')
+                raise error
 
             time.sleep(60)
 
+    @staticmethod
     def auto_update_token(func):
         """
         Decorator to automatically update the token if expired before invoking the function.
@@ -189,9 +194,9 @@ class BaseService(ABC):
         """
         Initialize the BaseService with a logger and token manager.
         """
-        self.logger = logger
+        self._logger = logger
         self.session = requests.Session()
-        self.token_manager = TokenManager(logger=self.logger)
+        self.token_manager = TokenManager(logger=self._logger)
 
     def _set_session_headers(self) -> None:
         """
@@ -218,7 +223,7 @@ class BaseService(ABC):
             return response.status_code, response.text
 
     @TokenManager.auto_update_token
-    def make_request(self, url: str, method: str = 'GET', payload: dict = None, files: dict = None) -> tuple:
+    def make_request(self, url: str, method: str = 'GET', payload: Any = None, files: dict = None) -> tuple:
         """
         Make an API request with retry logic for token expiration.
 
@@ -234,9 +239,9 @@ class BaseService(ABC):
         self._set_session_headers()
 
         try:
-            self.logger.debug(f"Payload: {payload}")
+            self._logger.debug(f"Payload: {payload}")
             response = self.session.request(method, url, json=payload, files=files)
-            self.logger.info(f"{response.url} {response.request.method} {response.status_code}")
+            self._logger.info(f"{response.url} {response.request.method} {response.status_code}")
             response.raise_for_status()
             return self._process_response(response)
 
@@ -244,9 +249,9 @@ class BaseService(ABC):
             return self._process_response(http_error.response)
 
         except requests.exceptions.RequestException as req_error:
-            self.logger.error(f"Request exception: {req_error}")
+            self._logger.error(f"Request exception: {req_error}")
             return 500, {'error': str(req_error)}
 
         except Exception as general_error:
-            self.logger.error(f"An unexpected error occurred: {general_error}")
+            self._logger.error(f"An unexpected error occurred: {general_error}")
             return 500, {'error': f'An unexpected error occurred: {general_error}'}

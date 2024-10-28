@@ -1,7 +1,6 @@
 import logging
 
 from celery import Task
-from django.conf import settings
 from django.utils import timezone
 
 from google_wrapper.services import GoogleChatService
@@ -11,7 +10,9 @@ from google_wrapper.utils.card_builder.elements import (
     CardHeader,
     Section,
 )
+from stos.utils import Configs
 
+configs = Configs()
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +26,7 @@ class STOsTask(Task):
         einfo – Exception info including the traceback.
         """
         # Check if the notification webhook URL is set in settings
-        hook_url = settings.NOTIFICATION_WEBHOOK
+        hook_url = configs.get('ROOT_NOTIFICATION_WEBHOOK')
         if hook_url:
             try:
                 # Build and send the Google Chat notification
