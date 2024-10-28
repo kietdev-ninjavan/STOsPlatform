@@ -47,18 +47,20 @@ jobs:
         run: |
           python manage.py makemigrations
 
-      # Step 7: Add and commit ignored migration files
+      # Step 7: Commit and push migrations, bypassing .gitignore
       - name: Commit and push migrations if any changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
-          
+
           # List and force-add ignored migration files
           MIGRATION_FILES=$(git ls-files --others -i --exclude-standard */migrations/*.py)
           if [ -n "$MIGRATION_FILES" ]; then
             echo "$MIGRATION_FILES" | xargs git add -f
             git commit -m "Auto-generate migrations"
-            git push origin migrations
+            git push "https://${GITHUB_TOKEN}@github.com/kietdev-ninjavan/STOsPlatform.git" HEAD:migrations
           else
             echo "No changes in migrations to commit"
           fi
