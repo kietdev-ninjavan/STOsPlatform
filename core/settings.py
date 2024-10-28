@@ -161,11 +161,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Custom User Model
 AUTH_USER_MODEL = 'stos.User'
 
-# Notification settings
-NOTIFICATION_WEBHOOK = config('NOTIFICATION_WEBHOOK_URL', default=None)
-
 # region Email settings
-DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER', default=None)
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
@@ -174,7 +171,7 @@ else:
     EMAIL_PORT = '587'
     EMAIL_USE_TLS = True
     EMAIL_HOST_USER = DEFAULT_FROM_EMAIL
-    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default=None)
 
 # endregion Email settings
 
