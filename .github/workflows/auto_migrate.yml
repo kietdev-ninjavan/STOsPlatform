@@ -47,18 +47,18 @@ jobs:
         run: |
           python manage.py makemigrations
 
-      # Step 7: Commit and push migrations, bypassing .gitignore
+      # Step 7: Add and commit ignored migration files
       - name: Commit and push migrations if any changes
         run: |
           git config --local user.name "GitHub Actions"
           git config --local user.email "actions@github.com"
-
-          # Check if there are any untracked or modified files in the migrations folder
-          if [ -n "$(git status --porcelain */migrations/*.py)" ]; then
-            git add -f */migrations/*.py # Force add all migration files
+          
+          # List and force-add ignored migration files
+          MIGRATION_FILES=$(git ls-files --others -i --exclude-standard */migrations/*.py)
+          if [ -n "$MIGRATION_FILES" ]; then
+            echo "$MIGRATION_FILES" | xargs git add -f
             git commit -m "Auto-generate migrations"
             git push origin migrations
           else
             echo "No changes in migrations to commit"
           fi
-      
