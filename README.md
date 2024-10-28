@@ -73,7 +73,7 @@ To run the project locally, follow the steps below:
 5. Create a database (MySQL) and update the database settings in the `.env` file:
 
     ```sql
-    CREATE DATABASE my_database CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
+    CREATE DATABASE platform_db CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;
     ```
 
 6. Run the migrations:
