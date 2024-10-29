@@ -34,6 +34,3 @@ ENV ALLOWED_HOSTS=*
 
 # Copy the current directory contents into the container
 COPY . /app/
-
-# Collect static files
-RUN python manage.py collectstatic --noinput
