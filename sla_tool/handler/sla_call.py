@@ -17,7 +17,7 @@ def collect_breach_sla_call():
     """
 
     # Initialize Google Sheet Service
-    service_account = get_service_account(configs.get('BI_SERVICE_ACCOUNT'))
+    service_account = get_service_account(configs.get('GSA_BI'))
     gsheet_service = GoogleSheetService(
         service_account=service_account,
         spreadsheet_id=configs.get('SLA_CALL_SPREADSHEET_ID')
@@ -102,7 +102,7 @@ def collect_record_call():
     """
 
     # Initialize Google Sheet Service
-    service_account = get_service_account(configs.get('BI_SERVICE_ACCOUNT'))
+    service_account = get_service_account(configs.get('GSA_BI'))
     gsheet_service = GoogleSheetService(
         service_account=service_account,
         spreadsheet_id=configs.get('RECORD_CALL_SPREADSHEET_ID')

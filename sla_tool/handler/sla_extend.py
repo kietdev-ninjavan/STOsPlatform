@@ -16,7 +16,7 @@ def collect_extend_sla():
     """
     Collects and stores the extend SLA tracking IDs.
     """
-    account_service = get_service_account(configs.get('BI_SERVICE_ACCOUNT'))
+    account_service = get_service_account(configs.get('GSA_BI'))
 
     # Initialize Google Drive Service
     gdrive_service = GoogleDriveService(service_account=account_service, logger=logger)

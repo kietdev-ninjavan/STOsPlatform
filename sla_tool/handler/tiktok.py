@@ -20,7 +20,7 @@ def collect_tiktok_backlogs():
     Collects TikTok backlog data from the Google sheet and stored to database.
     """
 
-    service_account = get_service_account(configs.get('GAS_WORKER01'))
+    service_account = get_service_account(configs.get('GSA_WORKER01'))
     gsheet_service = GoogleSheetService(
         service_account=service_account,
         spreadsheet_id=configs.get('TIKTOK_BACKLOG_SPREADSHEET_ID'),
@@ -47,6 +47,9 @@ def collect_tiktok_backlogs():
 
         new_records = []
         for index, row in enumerate(chunk):
+            if not row.get('Tracking ID'):
+                logger.warning(f'Tracking ID not found in row {index + 1}. Skipping row.')
+                continue
             # Skip if the record already exists
             if row.get('Tracking ID') in existing_pairs:
                 logger.info(f"Record {index + 1} already exists in the database.")
@@ -79,7 +82,7 @@ def update_tiktok_order_info_form_opv2():
 
     # Get all tracking IDs from the database
     qs_orders = TiktokBacklog.objects.filter(
-        Q(extended_date=timezone.now().date())
+        Q(date=timezone.now().date())
     )
 
     if not qs_orders.exists():
@@ -96,10 +99,15 @@ def update_tiktok_order_info_form_opv2():
         return
 
     order_has_changed = []
+    print(len(qs_orders))
+    print(len(orders))
     # Update the orders in the database
     for qs_order in qs_orders:
+
         tracking_id = qs_order.tracking_id
+        print(tracking_id)
         order = orders.get(tracking_id)
+        print(order)
         new_record = copy.deepcopy(qs_order)
         new_record.status = order.status
         new_record.granular_status = order.granular_status
