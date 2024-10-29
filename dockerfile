@@ -20,6 +20,9 @@ COPY requirements.txt /app/
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Install gunicorn
+RUN pip install gunicorn
+
 # Set environment variables
 # Project
 ENV PYTHONUNBUFFERED=1

@@ -159,7 +159,8 @@ def collect_shopee_backlogs():
     gdrive_service = __initialize_google_drive_service()
 
     # Get the Shopee Backlog spreadsheet ID
-    file_name = f'Backlog External {timezone.now().strftime("%Y-%m-%d")}'
+    yesterday = timezone.now() - timezone.timedelta(days=1)
+    file_name = f'Backlog External {yesterday.strftime("%Y-%m-%d")}'
 
     gs_file = gdrive_service.get_or_convert_to_google_sheet(file_name)
 
