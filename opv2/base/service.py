@@ -15,7 +15,7 @@ from google_wrapper.utils.card_builder import CardBuilder
 from google_wrapper.utils.card_builder import widgets as W
 from google_wrapper.utils.card_builder.elements import CardHeader, Section
 from stos.utils import Configs
-
+from google_wrapper.utils import get_service_account
 
 class TokenManager(metaclass=SingletonMeta):
     """
@@ -69,9 +69,7 @@ class TokenManager(metaclass=SingletonMeta):
         """
         configs = Configs()
         try:
-            service_account = ServiceAccount.objects.get(
-                name=configs.get('SYSTEM_ACCOUNT_SERVICE')
-            )
+            service_account = get_service_account(configs.get('GSA_SYSTEM'))
             gsheets_service = GoogleSheetService(
                 service_account=service_account,
                 spreadsheet_id=configs.get('OPV2_TOKEN_SPREADSHEET_ID'),

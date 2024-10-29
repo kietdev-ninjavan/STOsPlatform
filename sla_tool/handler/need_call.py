@@ -137,7 +137,7 @@ def get_sla_need_call():
 
 
 def out_to_stos_sheet():
-    service_account = get_service_account(configs.get('GAS_WORKER01'))
+    service_account = get_service_account(configs.get('GSA_WORKER01'))
     gsheet = GoogleSheetService(
         service_account,
         '1SmgayZSkqvIiT5VRgiEfhuWSTKgT6xS4sMYLQsdLI10',
@@ -148,7 +148,7 @@ def out_to_stos_sheet():
 
 
 def out_to_bi_sheet():
-    service_account = get_service_account(configs.get('GAS_BI'))
+    service_account = get_service_account(configs.get('GSA_BI'))
     gsheet = GoogleSheetService(
         service_account,
         '1h7KeEnCznjt-ms-uO-9KQUfpqXZ7ZnfANdx4bdh6-tU',

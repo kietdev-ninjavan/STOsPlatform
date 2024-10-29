@@ -20,7 +20,7 @@ def __initialize_google_sheet_service(spreadsheet_id: str):
     """
     Initializes the GoogleSheetService with the provided service account and spreadsheet ID.
     """
-    service_account = get_service_account(configs.get('GAS_WORKER01'))
+    service_account = get_service_account(configs.get('GSA_WORKER01'))
 
     try:
         gsheet_service = GoogleSheetService(
@@ -39,7 +39,7 @@ def __initialize_google_drive_service():
     """
     Initializes the GoogleDriveService with the provided service account.
     """
-    service_account = get_service_account(configs.get('GAS_WORKER01'))
+    service_account = get_service_account(configs.get('GSA_WORKER01'))
     try:
         google_drive_service = GoogleDriveService(
             service_account=service_account,
@@ -87,6 +87,10 @@ def __get_backlog_data(gsheet_service, worksheet):
                 pickup_done_time = parse_datetime(row.get('pickup_done_time'))
             except Exception as e:
                 logger.error(f'Error processing row {index + 1}: {e}')
+                continue
+
+            if not tracking_id:
+                logger.warning(f'Tracking ID not found in row {index + 1}. Skipping row.')
                 continue
 
             backlog = ShopeeBacklog(

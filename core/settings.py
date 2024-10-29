@@ -190,20 +190,11 @@ DJANGO_CELERY_BEAT_TZ_AWARE = False
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 # endregion Celery settings
 
-# region Logging
-LOG_PATH = config('LOG_PATH', default=BASE_DIR)
-
 # Get log level from the environment variables
 LOG_LEVEL = config('LOGGING_LEVEL', default='INFO')
 
 
 # Create specific log directories
-def get_log_path(log_name: str) -> Path:
-    log_dir = LOG_PATH / 'logs' / log_name
-    log_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
-    return log_dir / f'{log_name}.log'
-
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -222,15 +213,6 @@ LOGGING = {
             'level': LOG_LEVEL,
             'class': 'logging.StreamHandler',
             'formatter': 'detailed',
-        },
-        'file': {
-            'level': LOG_LEVEL,
-            'class': 'concurrent_log_handler.ConcurrentTimedRotatingFileHandler',
-            'formatter': 'detailed',
-            'filename': get_log_path('STOsPlatform'),
-            'when': 'midnight',
-            'backupCount': 31,
-            'encoding': 'utf-8',
         },
     },
     'root': {
