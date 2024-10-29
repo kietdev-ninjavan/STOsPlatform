@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
 # Set the working directory in the container
 WORKDIR /app
 
@@ -19,9 +18,6 @@ COPY requirements.txt /app/
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Install gunicorn
-RUN pip install gunicorn
 
 # Set environment variables
 # Project
@@ -39,4 +35,5 @@ ENV ALLOWED_HOSTS=*
 # Copy the current directory contents into the container
 COPY . /app/
 
-
+# Collect static files
+RUN python manage.py collectstatic --noinput
