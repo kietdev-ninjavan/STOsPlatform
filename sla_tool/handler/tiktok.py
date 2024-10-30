@@ -99,15 +99,11 @@ def update_tiktok_order_info_form_opv2():
         return
 
     order_has_changed = []
-    print(len(qs_orders))
-    print(len(orders))
     # Update the orders in the database
     for qs_order in qs_orders:
 
         tracking_id = qs_order.tracking_id
-        print(tracking_id)
         order = orders.get(tracking_id)
-        print(order)
         new_record = copy.deepcopy(qs_order)
         new_record.status = order.status
         new_record.granular_status = order.granular_status
