@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'google_wrapper.apps.GoogleWrapperConfig',
     'opv2.apps.OpV2Config',
     'sla_tool.apps.SlaAccuracyConfig',
+    'redash.apps.RedashConfig',
+    # 'reco_ticket.apps.RecoTicketConfig',
     # 'pre_success.apps.PreSuccessConfig',
 ]
 
@@ -90,7 +92,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'platform_db',
+        'NAME': config('DB_NAME', default='platform_db'),
         'USER': config('DB_USER', default='root'),
         'PASSWORD': config('DB_PASSWORD', default='root'),
         'HOST': config('DB_HOST', default='localhost'),
@@ -192,8 +194,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # Get log level from the environment variables
 LOG_LEVEL = config('LOGGING_LEVEL', default='INFO')
-
-
+LOKI_IP = config('LOKI_IP', default='localhost')
 # Create specific log directories
 LOGGING = {
     'version': 1,
@@ -214,12 +215,38 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'detailed',
         },
+        'sla_tool': {
+            'level': 'INFO',
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "sla_tool"},
+            'version': "1",
+        },
+        'change_date': {
+            'level': 'INFO',
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "change_date"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
         'level': LOG_LEVEL,
     },
     'loggers': {
+        'sla_tool': {
+            'handlers': ['sla_tool'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'reco_ticket.handler.change_date': {
+            'handlers': ['console', 'change_date'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
     },
 }
 # endregion Logging
