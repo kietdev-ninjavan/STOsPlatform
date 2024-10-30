@@ -1,4 +1,4 @@
-from celery import shared_task
+from celery import shared_task, chain
 
 from core.base.task import STOsTask
 from .handler.caculate_sla import (
@@ -75,3 +75,15 @@ def load_tiktok_order_info_task():
 def out_to_sheet_task():
     out_to_stos_sheet()
     out_to_bi_sheet()
+
+
+@shared_task(name='[SLA Tool] get_need_call_tasks', base=STOsTask)
+def collect_all_data_task():
+    return chain(
+        collect_call_data_task.s(),
+        collect_shopee_backlogs_task.s(),
+        collect_tiktok_backlogs_task.s(),
+        load_shopee_order_info_task.s(),
+        load_tiktok_order_info_task.s(),
+        out_to_sheet_task.s(),
+    )()
