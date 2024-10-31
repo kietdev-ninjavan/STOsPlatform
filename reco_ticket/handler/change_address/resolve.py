@@ -179,6 +179,7 @@ def resolved_ticket_tokgistics():
 def resolved_ticket_incorrect_format():
     tickets = TicketChangeAddress.objects.filter(
         Q(action__isnull=True) &
+        Q(detect__isnull=False) &
         (Q(detect__province__isnull=True)
          | Q(detect__district__isnull=True)
          | Q(detect__ward__isnull=True)
