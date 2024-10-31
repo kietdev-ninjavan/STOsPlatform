@@ -85,3 +85,18 @@ class OrderService(BaseService):
             return 404, {}
 
         return 200, search_data
+
+    def change_to_address(self, order_id: int, address1: str, address2: str, city: str, ) -> tuple:
+        url = f"{self._base_url}/core/2.0/orders/{order_id}"
+        payload = {
+            "to": {
+                "address": {
+                    "address1": address1,
+                    "address2": address2,
+                    "city": city,
+                    "country": "VN",
+                    "postcode": ""
+                }
+            }
+        }
+        return self.make_request(url, method='PATCH', payload=payload)

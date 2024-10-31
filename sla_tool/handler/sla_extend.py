@@ -5,11 +5,10 @@ from simple_history.utils import bulk_create_with_history
 
 from google_wrapper.services import GoogleDriveService
 from google_wrapper.utils import get_service_account
-from stos.utils import Configs, chunk_list
+from stos.utils import configs, chunk_list
 from ..models import ExtendSLATracking
 
 logger = logging.getLogger(__name__)
-configs = Configs()
 
 
 def collect_extend_sla():

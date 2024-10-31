@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from itertools import islice
 from typing import Dict, Optional
-from typing import List, Any, Generator
+from typing import List, Any, Generator, Tuple
 from unicodedata import normalize
 
 from django.utils import timezone
@@ -133,6 +133,8 @@ def parse_datetime(date_string: str, custom_formats: Optional[List[str]] = None)
         "%d/%m/%Y %H:%M",  # Date and time without seconds
         "%m-%d-%Y %H:%M",  # Date and time without seconds
         "%d-%m-%Y %H:%M",  # Date and time without seconds
+        "%Y-%m-%dT%H:%M:%SZ",  # Date and time in ISO 8601 format
+        "%Y-%m-%dT%H:%M:%S.%fZ",  # Date and time in ISO 8601 format with microseconds
     ]
 
     # Add custom formats if provided
@@ -188,3 +190,29 @@ def check_record_change(existing_record: BaseModel, updated_record: BaseModel, e
         existing_record.updated_date = timezone.now()
 
     return is_updated, existing_record, updated_fields
+
+
+def paginate_count(total_count: int, page_size: int) -> List[Tuple[int, int]]:
+    """
+    Generates pagination information based on a total count and page size.
+
+    Args:
+        total_count (int): The total number of items.
+        page_size (int): The number of items per page.
+
+    Returns:
+        List[Tuple[int, int]]: A list of tuples, where each tuple contains the page number and the size of that page.
+    """
+    pages = []
+    total_pages = (total_count + page_size - 1) // page_size
+
+    for page_num in range(1, total_pages + 1):
+        # Calculate size for the current page
+        if page_num == total_pages and total_count % page_size != 0:
+            page_size_actual = total_count % page_size  # Last page might have fewer items
+        else:
+            page_size_actual = page_size
+
+        pages.append((page_num, page_size_actual))
+
+    return pages

@@ -4,11 +4,10 @@ from simple_history.utils import bulk_create_with_history
 
 from google_wrapper.services import GoogleSheetService
 from google_wrapper.utils import get_service_account
-from stos.utils import Configs, chunk_list, parse_datetime
+from stos.utils import configs, chunk_list, parse_datetime
 from ..models import BreachSLACall, RecordSLACall
 
 logger = logging.getLogger(__name__)
-configs = Configs()
 
 
 def collect_breach_sla_call():

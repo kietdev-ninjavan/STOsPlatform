@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'opv2.apps.OpV2Config',
     'sla_tool.apps.SlaAccuracyConfig',
     'redash.apps.RedashConfig',
-    # 'reco_ticket.apps.RecoTicketConfig',
+    'network.apps.NetworkConfig',
+    'reco_ticket.apps.RecoTicketConfig',
     # 'pre_success.apps.PreSuccessConfig',
 ]
 
@@ -216,7 +217,7 @@ LOGGING = {
             'formatter': 'detailed',
         },
         'sla_tool': {
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -224,26 +225,52 @@ LOGGING = {
             'version': "1",
         },
         'change_date': {
-            'level': 'INFO',
+            'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
             'tags': {"tool": "change_date"},
             'version': "1",
         },
+        'change_address': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "change_address"},
+            'version': "1",
+        },
+        'network': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "network"},
+            'version': "1",
+        }
     },
     'root': {
         'handlers': ['console'],
         'level': LOG_LEVEL,
     },
     'loggers': {
+        'network': {
+            'handlers': ['console', 'network'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
         'sla_tool': {
-            'handlers': ['sla_tool'],
+            'handlers': ['console', 'sla_tool'],
             'level': LOG_LEVEL,
             'propagate': False,
         },
         'reco_ticket.handler.change_date': {
             'handlers': ['console', 'change_date'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'reco_ticket.handler.change_address': {
+            'handlers': ['console', 'change_address'],
             'level': LOG_LEVEL,
             'propagate': False,
         },

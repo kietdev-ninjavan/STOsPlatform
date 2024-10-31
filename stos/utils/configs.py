@@ -1,8 +1,7 @@
-from core.patterns import SingletonMeta
 from ..models import Config
 
 
-class Configs(metaclass=SingletonMeta):
+class Configs:
     def __init__(self):
         pass
 
@@ -28,3 +27,6 @@ class Configs(metaclass=SingletonMeta):
         """
         config, created = Config.objects.update_or_create(key=key, defaults={'value': value})
         return config
+
+
+configs = Configs()

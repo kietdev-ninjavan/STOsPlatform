@@ -1,4 +1,4 @@
-from .configs import Configs
+from .configs import configs
 from .security import encrypt_value, decrypt_value
 from .utils import (
     chunk_dict,
@@ -6,5 +6,6 @@ from .utils import (
     text_in_text,
     clear_temporary_file,
     parse_datetime,
-    check_record_change
+    check_record_change,
+    paginate_count
 )
