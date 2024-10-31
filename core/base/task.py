@@ -1,6 +1,6 @@
 import logging
 
-from celery import Task
+from celery_once import QueueOnce
 from django.utils import timezone
 
 from google_wrapper.services import GoogleChatService
@@ -15,7 +15,13 @@ from stos.utils import configs
 logger = logging.getLogger(__name__)
 
 
-class STOsTask(Task):
+class STOsTask(QueueOnce):
+    # Set the unique key for the task
+    once = {
+        'graceful': True,
+        'keys': ['task_name']
+    }
+
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """
         exc – The exception raised by the task.
