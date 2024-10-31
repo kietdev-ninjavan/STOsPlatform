@@ -84,7 +84,7 @@ def collect_hubs():
                     update_data,
                     Hub,
                     fields=[
-                        'name', 'country', 'city', 'latitude' 'longitude', 'region', 'area', 'active', 'short_name',
+                        'name', 'country', 'city', 'latitude', 'longitude', 'region', 'area', 'active', 'short_name',
                         'sort_hub', 'facility_type', 'opv2_created_at', 'opv2_updated_at', 'virtual_hub', 'parent_hub'
                     ],
                     batch_size=1000

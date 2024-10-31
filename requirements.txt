@@ -7,6 +7,7 @@ backoff==2.2.1
 billiard==4.2.1
 cachetools==5.5.0
 celery==5.4.0
+celery_once==3.0.1
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.3.2

@@ -191,6 +191,15 @@ CELERY_TASK_MAX_RETRIES = 3
 # Celery Beat
 DJANGO_CELERY_BEAT_TZ_AWARE = False
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# In your Celery settings or configuration file
+CELERY_ONCE = {
+    'backend': 'celery_once.backends.Redis',
+    'settings': {
+        'url': CELERY_BROKER_URL,
+        'default_timeout': 60 * 5
+    }
+}
 # endregion Celery settings
 
 # Get log level from the environment variables
