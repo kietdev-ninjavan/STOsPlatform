@@ -75,7 +75,7 @@ def resolved_ticket_incorrect_format_task(*args, **kwargs):
     resolved_ticket_incorrect_format()
 
 
-@shared_task(name='[SLA Tool] get_need_call_tasks', base=STOsTask)
+@shared_task(name='[Change Address] Handler Ticket Change Address', base=STOsTask)
 def collect_all_data_task():
     return chain(
         collect_ticket_change_address_task.s(),
