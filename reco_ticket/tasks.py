@@ -9,6 +9,7 @@ from .handler.change_address.collect_data import (
     collect_ticket_change_address,
     load_order_info
 )
+from .handler.change_address.detect import detect_address
 from .handler.change_address.manual import manual_ticket_have_alo_link
 from .handler.change_address.resolve import (
     resolved_rts_and_last_status,
@@ -60,6 +61,11 @@ def resolved_ticket_tokgistics_task(*args, **kwargs):
     resolved_ticket_tokgistics()
 
 
+@shared_task(name='[Change Address] detect_address_task', base=STOsTask)
+def detect_address_task(*args, **kwargs):
+    detect_address()
+
+
 @shared_task(name='[Change Address] approve_hcm_dn_hn_task', base=STOsTask)
 def approve_hcm_dn_hn_task(*args, **kwargs):
     approve_hcm_dn_hn()
@@ -86,6 +92,7 @@ def collect_all_data_task():
         resolved_ticket_storage_max_stored_task.s(),
         resolved_have_changed_address_task.s(),
         resolved_ticket_tokgistics_task.s(),
+        detect_address_task.s(),
         approve_hcm_dn_hn_task.s(),
         resolved_ticket_incorrect_format_task.s(),
         approve_map_2_level_task.s(),
