@@ -30,6 +30,10 @@ class RedashClient(BaseAPI):
                                       Defaults to the value in the environment variable REDASH_ENDPOINT.
             logger (logging.Logger): Optional; logger instance for logging.
         """
+        if not api_key:
+            logger.error("Redash API key is missing.")
+            raise ValueError("Redash API key is missing.")
+
         if endpoint is None:
             endpoint = 'https://redash-vn.ninjavan.co'
 

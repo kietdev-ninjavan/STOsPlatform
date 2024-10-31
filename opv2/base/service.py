@@ -1,5 +1,4 @@
 import logging
-import threading
 import time
 from abc import ABC
 from typing import Any
@@ -15,7 +14,7 @@ from google_wrapper.utils import get_service_account
 from google_wrapper.utils.card_builder import CardBuilder
 from google_wrapper.utils.card_builder import widgets as W
 from google_wrapper.utils.card_builder.elements import CardHeader, Section
-from stos.utils import Configs
+from stos.utils import configs
 
 
 class TokenManager(metaclass=SingletonMeta):
@@ -32,8 +31,7 @@ class TokenManager(metaclass=SingletonMeta):
         Initialize the TokenManager with a logger and token lock for thread safety.
         """
         self.__logger = logger
-        self.__token_lock = threading.Lock()
-        self.__configs = Configs()
+        self.__configs = configs
         self.__webhook_url = self.__configs.get('ROOT_NOTIFICATION_WEBHOOK')
 
     @staticmethod
@@ -68,7 +66,6 @@ class TokenManager(metaclass=SingletonMeta):
         Returns:
             str: The token retrieved from the Google Sheet.
         """
-        configs = Configs()
         try:
             service_account = get_service_account(configs.get('GSA_SYSTEM'))
             gsheets_service = GoogleSheetService(
@@ -106,8 +103,7 @@ class TokenManager(metaclass=SingletonMeta):
         try:
             response = session.get(url)
             if response.status_code == 200:
-                roles = list(response.json()['vn'].keys())
-                self.__logger.info(f"Token is valid with roles: {roles}")
+                self.__logger.info("Token is valid.")
                 return False
             if response.status_code == 401:
                 self.__logger.info("Token has expired.")
@@ -124,34 +120,27 @@ class TokenManager(metaclass=SingletonMeta):
         Retry until a valid token is fetched and cached.
         """
         chat_service = GoogleChatService(logger=self.__logger)
-        while True:
-            card = self._build_card(
-                header='<font color="#de1304">OPv2 Token Expired</font>',
-                message=f'Token: "{self.token}". Please update token in Google Sheet.\nRetrying in 60 seconds.'
-            )
-            chat_service.webhook_send(self.__webhook_url, card=card)
-            try:
-                self.__logger.info('Attempting to update token...')
-                new_token = self._get_token_from_gsheet()
-                if new_token != self.token:
-                    cache.set(self.TOKEN_CACHE_KEY, new_token, timeout=self.TOKEN_CACHE_TIMEOUT)
-                    self.__logger.info('Token successfully updated and cached.')
+        card = self._build_card(
+            header='<font color="#de1304">OPv2 Token Expired</font>',
+            message=f'Token: "{self.token}".\nPlease update token in Google Sheet.\nRetrying in 60 seconds.'
+        )
+        chat_service.webhook_send(self.__webhook_url, card=card)
+        time.sleep(60)
+        try:
+            self.__logger.info('Attempting to update token...')
+            new_token = self._get_token_from_gsheet()
+            if new_token != self.token:
+                cache.set(self.TOKEN_CACHE_KEY, new_token, timeout=self.TOKEN_CACHE_TIMEOUT)
+                self.__logger.info('Token successfully updated and cached.')
 
-                    # Check if the token is valid
-                    if not self.token_is_expired():
-                        card = self._build_card(
-                            header='<font color="#38761d">OPv2 Token Updated</font>',
-                            message=f'Updated token: "{new_token}".'
-                        )
-                        chat_service.webhook_send(self.__webhook_url, card=card)
-                        break
-                    else:
-                        self.__logger.error('Token not change. update again.')
-            except Exception as error:
-                self.__logger.error(f'Error updating token: {error}')
-                raise error
-
-            time.sleep(60)
+                card = self._build_card(
+                    header='<font color="#38761d">OPv2 Token Updated</font>',
+                    message=f'Updated token: "{new_token}".'
+                )
+                chat_service.webhook_send(self.__webhook_url, card=card)
+        except Exception as error:
+            self.__logger.error(f'Error updating token: {error}')
+            raise error
 
     @staticmethod
     def auto_update_token(func):

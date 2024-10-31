@@ -10,9 +10,8 @@ from google_wrapper.utils.card_builder.elements import (
     CardHeader,
     Section,
 )
-from stos.utils import Configs
+from stos.utils import configs
 
-configs = Configs()
 logger = logging.getLogger(__name__)
 
 

@@ -9,11 +9,10 @@ from simple_history.utils import bulk_create_with_history, bulk_update_with_hist
 from google_wrapper.services import GoogleSheetService, GoogleDriveService
 from google_wrapper.utils import get_service_account
 from opv2.services import OrderService
-from stos.utils import Configs, chunk_list, parse_datetime, check_record_change
+from stos.utils import configs, chunk_list, parse_datetime, check_record_change
 from ..models import ShopeeBacklog
 
 logger = logging.getLogger(__name__)
-configs = Configs()
 
 
 def __initialize_google_sheet_service(spreadsheet_id: str):

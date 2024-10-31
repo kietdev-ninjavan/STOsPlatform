@@ -7,10 +7,9 @@ from django.utils import timezone
 from google_wrapper.services import GoogleSheetService
 from google_wrapper.utils import get_service_account
 from opv2.base.order import GranularStatusChoices
-from stos.utils import Configs
+from stos.utils import configs
 from ..models import ShopeeBacklog, TiktokBacklog, RecordSLACall, BreachSLACall
 
-configs = Configs()
 logger = logging.getLogger(__name__)
 
 
