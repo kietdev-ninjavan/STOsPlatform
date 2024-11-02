@@ -29,7 +29,7 @@ from .handler.change_date.actions import (
 )
 from .handler.change_date.collect_data import (
     collect_ticket_change_date,
-    load_order_info
+    load_order_info_change_date
 )
 from .handler.change_date.detect import detect_date
 
@@ -123,8 +123,8 @@ def collect_ticket_change_date_task(*args, **kwargs):
 
 
 @shared_task(name='[Change Date] load_order_info_task', base=STOsTask)
-def load_order_info_task(*args, **kwargs):
-    load_order_info()
+def load_order_info_change_date_task(*args, **kwargs):
+    load_order_info_change_date()
 
 
 @shared_task(name='[Change Date] detect_date_task', base=STOsTask)
@@ -163,10 +163,10 @@ def apply_action_task(*args, **kwargs):
 
 
 @shared_task(name='[Change Date] Handler Ticket Change Date', base=STOsTask)
-def collect_all_data_task():
+def ticket_change_date_task():
     return chain(
         collect_ticket_change_date_task.s(),
-        load_order_info_task.s(),
+        load_order_info_change_date_task.s(),
         not_have_first_delivery_date_task.s(),
         have_rts_or_last_status_task.s(),
         detect_date_task.s(),

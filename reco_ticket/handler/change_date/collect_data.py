@@ -64,7 +64,7 @@ def collect_ticket_change_date():
     logger.info(f'Successfully inserted {total_success}/{total_tickets} tickets change date records.')
 
 
-def load_order_info():
+def load_order_info_change_date():
     tickets = TicketChangeDate.objects.filter(
         Q(action__isnull=True)
     )
