@@ -17,11 +17,6 @@ logger = logging.getLogger(__name__)
 
 class STOsTask(QueueOnce):
     # Set the unique key for the task
-    once = {
-        'graceful': True,
-        'keys': ['task_name']
-    }
-
     def on_failure(self, exc, task_id, args, kwargs, einfo):
         """
         exc – The exception raised by the task.
