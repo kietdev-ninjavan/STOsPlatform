@@ -80,7 +80,6 @@ def out_to_sheet_task(*args, **kwargs):
 @shared_task(name='[SLA Tool] get_need_call_tasks', base=STOsTask)
 def collect_all_data_task():
     return chain(
-        collect_call_data_task.s(),
         collect_shopee_backlogs_task.s(),
         collect_tiktok_backlogs_task.s(),
         load_shopee_order_info_task.s(),
