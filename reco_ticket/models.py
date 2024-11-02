@@ -1,7 +1,7 @@
 from django.db import models
 
 from core.base.model import BaseModel
-from opv2.base.order import StatusChoices
+from opv2.base.order import GranularStatusChoices
 from opv2.base.ticket import BaseTicket
 
 
@@ -12,6 +12,16 @@ class TicketChangeDate(BaseTicket):
     exception_reason = models.TextField(null=True, blank=True)
     first_delivery_date = models.DateTimeField(null=True, blank=True)
     detected_date = models.DateField(null=True, blank=True)
+    action = models.CharField(max_length=255, null=True, blank=True)
+    action_reason = models.CharField(max_length=255, null=True, blank=True)
+    apply_action = models.DateTimeField(null=True, blank=True)
+    rts_flag = models.BooleanField(default=False)
+    order_id = models.BigIntegerField(null=True, blank=True)
+    order_status = models.CharField(
+        max_length=255,
+        choices=GranularStatusChoices.choices,
+        null=True, blank=True
+    )
 
     class Meta:
         verbose_name = 'Ticket Change Date'
@@ -36,7 +46,7 @@ class TicketChangeAddress(BaseTicket):
     zone_name = models.CharField(max_length=255, null=True, blank=True)
     order_status = models.CharField(
         max_length=255,
-        choices=StatusChoices.choices,
+        choices=GranularStatusChoices.choices,
         null=True, blank=True
     )
     action = models.CharField(max_length=255, null=True, blank=True)
@@ -55,3 +65,7 @@ class DetectChangeAddress(BaseModel):
     district = models.CharField(max_length=255, null=True)
     ward = models.CharField(max_length=255, null=True)
     ticket = models.OneToOneField(TicketChangeAddress, on_delete=models.CASCADE, related_name='detect')
+
+    class Meta:
+        verbose_name = 'Detect Change Address'
+        verbose_name_plural = 'Detect Change Addresses'
