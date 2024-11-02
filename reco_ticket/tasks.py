@@ -36,72 +36,72 @@ from .handler.change_date.detect import detect_date
 
 
 # region Change Address
-@shared_task(name='[Change Address] collect_ticket_change_address_task', base=STOsTask)
+@shared_task(name='[Change Address] collect_ticket_change_address_task', base=STOsTask, once={'graceful': True})
 def collect_ticket_change_address_task(*args, **kwargs):
     collect_ticket_change_address()
 
 
-@shared_task(name='[Change Address] manual_ticket_have_alo_link_task', base=STOsTask)
+@shared_task(name='[Change Address] manual_ticket_have_alo_link_task', base=STOsTask, once={'graceful': True})
 def manual_ticket_have_alo_link_task(*args, **kwargs):
     manual_ticket_have_alo_link()
 
 
-@shared_task(name='[Change Address] load_order_info_task', base=STOsTask)
+@shared_task(name='[Change Address] load_order_info_task', base=STOsTask, once={'graceful': True})
 def load_order_info_task(*args, **kwargs):
     load_order_info()
 
 
-@shared_task(name='[Change Address] resolved_rts_and_last_status_task', base=STOsTask)
+@shared_task(name='[Change Address] resolved_rts_and_last_status_task', base=STOsTask, once={'graceful': True})
 def resolved_rts_and_last_status_task(*args, **kwargs):
     resolved_rts_and_last_status()
 
 
-@shared_task(name='[Change Address] resolved_ticket_system_create_task', base=STOsTask)
+@shared_task(name='[Change Address] resolved_ticket_system_create_task', base=STOsTask, once={'graceful': True})
 def resolved_ticket_system_create_task(*args, **kwargs):
     resolved_ticket_system_create()
 
 
-@shared_task(name='[Change Address] resolved_ticket_storage_max_stored_task', base=STOsTask)
+@shared_task(name='[Change Address] resolved_ticket_storage_max_stored_task', base=STOsTask, once={'graceful': True})
 def resolved_ticket_storage_max_stored_task(*args, **kwargs):
     resolved_ticket_storage_max_stored()
 
 
-@shared_task(name='[Change Address] resolved_have_changed_address_task', base=STOsTask)
+@shared_task(name='[Change Address] resolved_have_changed_address_task', base=STOsTask, once={'graceful': True})
 def resolved_have_changed_address_task(*args, **kwargs):
     resolved_have_changed_address()
 
 
-@shared_task(name='[Change Address] resolved_ticket_tokgistics_task', base=STOsTask)
+@shared_task(name='[Change Address] resolved_ticket_tokgistics_task', base=STOsTask, once={'graceful': True})
 def resolved_ticket_tokgistics_task(*args, **kwargs):
     resolved_ticket_tokgistics()
 
 
-@shared_task(name='[Change Address] detect_address_task', base=STOsTask)
+@shared_task(name='[Change Address] detect_address_task', base=STOsTask, once={'graceful': True})
 def detect_address_task(*args, **kwargs):
     detect_address()
 
 
-@shared_task(name='[Change Address] approve_hcm_dn_hn_task', base=STOsTask)
+@shared_task(name='[Change Address] approve_hcm_dn_hn_task', base=STOsTask, once={'graceful': True})
 def approve_hcm_dn_hn_task(*args, **kwargs):
     approve_hcm_dn_hn()
 
 
-@shared_task(name='[Change Address] approve_map_2_level_task', base=STOsTask)
+@shared_task(name='[Change Address] approve_map_2_level_task', base=STOsTask, once={'graceful': True})
 def approve_map_2_level_task(*args, **kwargs):
     approve_map_2_level()
 
 
-@shared_task(name='[Change Address] resolved_ticket_incorrect_format_task', base=STOsTask)
+@shared_task(name='[Change Address] resolved_ticket_incorrect_format_task', base=STOsTask, once={'graceful': True})
 def resolved_ticket_incorrect_format_task(*args, **kwargs):
     resolved_ticket_incorrect_format()
 
 
-@shared_task(name='[Change Address] out_to_gsheet_task', base=STOsTask)
+@shared_task(name='[Change Address] out_to_gsheet_task', base=STOsTask, once={'graceful': True})
 def change_address_out_to_gsheet_task(*args, **kwargs):
     change_address_out_to_gsheet()
 
 
-@shared_task(name='[Change Address] Handler Ticket Change Address', base=STOsTask)
+@shared_task(name='[Change Address] Handler Ticket Change Address', base=STOsTask, once={'graceful': True})
 def collect_all_data_task():
     return chain(
         collect_ticket_change_address_task.s(),
@@ -124,52 +124,52 @@ def collect_all_data_task():
 # endregion
 
 # region Change Date
-@shared_task(name='[Change Date] load_order_info_task', base=STOsTask)
+@shared_task(name='[Change Date] load_order_info_task', base=STOsTask, once={'graceful': True})
 def collect_ticket_change_date_task(*args, **kwargs):
     collect_ticket_change_date()
 
 
-@shared_task(name='[Change Date] load_order_info_task', base=STOsTask)
+@shared_task(name='[Change Date] load_order_info_task', base=STOsTask, once={'graceful': True})
 def load_order_info_change_date_task(*args, **kwargs):
     load_order_info_change_date()
 
 
-@shared_task(name='[Change Date] detect_date_task', base=STOsTask)
+@shared_task(name='[Change Date] detect_date_task', base=STOsTask, once={'graceful': True})
 def detect_date_task(*args, **kwargs):
     detect_date()
 
 
-@shared_task(name='[Change Date] not_have_first_delivery_date_task', base=STOsTask)
+@shared_task(name='[Change Date] not_have_first_delivery_date_task', base=STOsTask, once={'graceful': True})
 def not_have_first_delivery_date_task(*args, **kwargs):
     not_have_first_delivery_date()
 
 
-@shared_task(name='[Change Date] have_rts_or_last_status_task', base=STOsTask)
+@shared_task(name='[Change Date] have_rts_or_last_status_task', base=STOsTask, once={'graceful': True})
 def have_rts_or_last_status_task(*args, **kwargs):
     have_rts_or_last_status()
 
 
-@shared_task(name='[Change Date] more_than_five_date_task', base=STOsTask)
+@shared_task(name='[Change Date] more_than_five_date_task', base=STOsTask, once={'graceful': True})
 def more_than_five_date_task(*args, **kwargs):
     more_than_five_date()
 
 
-@shared_task(name='[Change Date] incorrect_format_date_task', base=STOsTask)
+@shared_task(name='[Change Date] incorrect_format_date_task', base=STOsTask, once={'graceful': True})
 def incorrect_format_date_task(*args, **kwargs):
     incorrect_format_date()
 
 
-@shared_task(name='[Change Date] approve_tickets_task', base=STOsTask)
+@shared_task(name='[Change Date] approve_tickets_task', base=STOsTask, once={'graceful': True})
 def approve_tickets_task(*args, **kwargs):
     approve_tickets()
 
 
-@shared_task(name='[Change Date] apply_action_task', base=STOsTask)
+@shared_task(name='[Change Date] apply_action_task', base=STOsTask, once={'graceful': True})
 def apply_action_task(*args, **kwargs):
     apply_action()
 
 
-@shared_task(name='[Change Date] Handler Ticket Change Date', base=STOsTask)
+@shared_task(name='[Change Date] Handler Ticket Change Date', base=STOsTask, once={'graceful': True})
 def ticket_change_date_task():
     return chain(
         collect_ticket_change_date_task.s(),
