@@ -216,3 +216,21 @@ def paginate_count(total_count: int, page_size: int) -> List[Tuple[int, int]]:
         pages.append((page_num, page_size_actual))
 
     return pages
+
+
+def swap_day_month_if_different(date: datetime) -> datetime:
+    """
+    Swaps the day and month in a datetime object if the month is different from the current month.
+    :param date:
+    :return:
+    """
+    current_month = datetime.now().month
+    # Swap only if the input month is different from the current month
+    if date.month != current_month:
+        try:
+            # Attempt to swap day and month
+            return date.replace(day=date.month, month=date.day)
+        except ValueError:
+            # Return original date if swap results in an invalid date
+            return date
+    return date

@@ -1,7 +1,11 @@
 import logging
 
+from django.db.models import Q
+from django.utils import timezone
 from simple_history.utils import bulk_create_with_history
+from simple_history.utils import bulk_update_with_history
 
+from opv2.services import OrderService
 from redash.client import RedashClient
 from stos.utils import configs, chunk_list
 from ...models import TicketChangeDate
@@ -58,3 +62,44 @@ def collect_ticket_change_date():
         logger.info(f"Successfully inserted {len(success)} tickets change date records.")
 
     logger.info(f'Successfully inserted {total_success}/{total_tickets} tickets change date records.')
+
+
+def load_order_info_change_date():
+    tickets = TicketChangeDate.objects.filter(
+        Q(action__isnull=True)
+    )
+
+    if not tickets.exists():
+        logger.info("No ticket to load order info")
+        return
+
+    order_svc = OrderService(logger=logger)
+    tracking_ids = tickets.values_list('tracking_id', flat=True)
+    stt_code, result = order_svc.search_all(tracking_ids)
+
+    if stt_code != 200:
+        logger.error(f"Error searching orders: {result}")
+        raise Exception("Error searching orders")
+    update = []
+    for ticket in tickets:
+        info = result.get(ticket.tracking_id)
+        if not info:
+            continue
+        ticket.order_id = info.id
+        ticket.rts_flag = info.is_rts
+        ticket.order_status = info.granular_status
+        ticket.updated_date = timezone.now()
+
+        update.append(ticket)
+
+    try:
+        success = bulk_update_with_history(
+            update,
+            TicketChangeDate, batch_size=1000,
+            fields=['order_id', 'rts_flag', 'order_status', 'updated_date']
+        )
+
+        logger.info(f"Updated {success}/{tickets.count()} tickets' order info")
+    except Exception as e:
+        logger.error(f"Failed to update orders: {e}")
+        raise e

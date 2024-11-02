@@ -19,8 +19,22 @@ from .handler.change_address.resolve import (
     resolved_ticket_tokgistics,
     resolved_ticket_incorrect_format
 )
+from .handler.change_date.actions import (
+    not_have_first_delivery_date,
+    have_rts_or_last_status,
+    more_than_five_date,
+    incorrect_format_date,
+    approve_tickets,
+    apply_action
+)
+from .handler.change_date.collect_data import (
+    collect_ticket_change_date,
+    load_order_info_change_date
+)
+from .handler.change_date.detect import detect_date
 
 
+# region Change Address
 @shared_task(name='[Change Address] collect_ticket_change_address_task', base=STOsTask)
 def collect_ticket_change_address_task(*args, **kwargs):
     collect_ticket_change_address()
@@ -93,7 +107,73 @@ def collect_all_data_task():
         resolved_have_changed_address_task.s(),
         resolved_ticket_tokgistics_task.s(),
         detect_address_task.s(),
+        detect_address_task.s(),
         approve_hcm_dn_hn_task.s(),
         resolved_ticket_incorrect_format_task.s(),
         approve_map_2_level_task.s(),
     )()
+
+
+# endregion
+
+# region Change Date
+@shared_task(name='[Change Date] load_order_info_task', base=STOsTask)
+def collect_ticket_change_date_task(*args, **kwargs):
+    collect_ticket_change_date()
+
+
+@shared_task(name='[Change Date] load_order_info_task', base=STOsTask)
+def load_order_info_change_date_task(*args, **kwargs):
+    load_order_info_change_date()
+
+
+@shared_task(name='[Change Date] detect_date_task', base=STOsTask)
+def detect_date_task(*args, **kwargs):
+    detect_date()
+
+
+@shared_task(name='[Change Date] not_have_first_delivery_date_task', base=STOsTask)
+def not_have_first_delivery_date_task(*args, **kwargs):
+    not_have_first_delivery_date()
+
+
+@shared_task(name='[Change Date] have_rts_or_last_status_task', base=STOsTask)
+def have_rts_or_last_status_task(*args, **kwargs):
+    have_rts_or_last_status()
+
+
+@shared_task(name='[Change Date] more_than_five_date_task', base=STOsTask)
+def more_than_five_date_task(*args, **kwargs):
+    more_than_five_date()
+
+
+@shared_task(name='[Change Date] incorrect_format_date_task', base=STOsTask)
+def incorrect_format_date_task(*args, **kwargs):
+    incorrect_format_date()
+
+
+@shared_task(name='[Change Date] approve_tickets_task', base=STOsTask)
+def approve_tickets_task(*args, **kwargs):
+    approve_tickets()
+
+
+@shared_task(name='[Change Date] apply_action_task', base=STOsTask)
+def apply_action_task(*args, **kwargs):
+    apply_action()
+
+
+@shared_task(name='[Change Date] Handler Ticket Change Date', base=STOsTask)
+def ticket_change_date_task():
+    return chain(
+        collect_ticket_change_date_task.s(),
+        load_order_info_change_date_task.s(),
+        not_have_first_delivery_date_task.s(),
+        have_rts_or_last_status_task.s(),
+        detect_date_task.s(),
+        detect_address_task.s(),
+        more_than_five_date_task.s(),
+        incorrect_format_date_task.s(),
+        approve_tickets_task.s(),
+    )()
+
+# endregion
