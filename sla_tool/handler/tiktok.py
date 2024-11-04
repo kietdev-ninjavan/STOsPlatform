@@ -57,7 +57,8 @@ def collect_tiktok_backlogs():
                 new_records.append(TiktokBacklog(
                     ticket_no=row.get('Ticket No'),
                     tracking_id=row.get('Tracking ID'),
-                    date=parse_datetime(row.get('Date')).date()
+                    date=parse_datetime(row.get('Date')).date(),
+                    shipper_date=parse_datetime(row.get('Date')).date()
                 ))
             except Exception as e:
                 logger.error(f"Error in processing record {index + 1}: {e}")
