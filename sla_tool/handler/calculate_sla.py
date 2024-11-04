@@ -1,5 +1,6 @@
 import logging
 
+from django.db.models import Q
 from django.utils import timezone
 from simple_history.utils import bulk_update_with_history
 
@@ -13,7 +14,7 @@ def calculate_sla_date_shopee():
     Calculate the SLA date for Shopee backlogs in bulk for better performance.
     """
     # Fetch all necessary ShopeeBacklog and ExtendSLATracking objects
-    shopee_backlogs = ShopeeBacklog.objects.filter(aging_from_lost_threshold=0)
+    shopee_backlogs = ShopeeBacklog.objects.filter(Q(shipper_date=timezone.now().date()))
 
     # Fetch ExtendSLATracking and create a lookup dictionary by tracking_id
     extend_sla_tracking = ExtendSLATracking.objects.filter(
@@ -24,13 +25,13 @@ def calculate_sla_date_shopee():
 
     update_list = []
     for backlog in shopee_backlogs:
-        extend_sla = extend_sla_dict.get(backlog.tracking_id)
+        extend_sla = extend_sla_dict.get(backlog.tracking_id, None)
         if extend_sla:
             backlog.extend_days = extend_sla.extend_days
-            backlog.extended_date = extend_sla.breach_sla_expectation
+            backlog.extended_date = timezone.now() + timezone.timedelta(days=extend_sla.extend_days)
         else:
             backlog.extend_days = 0
-            backlog.extended_date = timezone.now() + timezone.timedelta(days=1)
+            backlog.extended_date = timezone.now()
         update_list.append(backlog)
 
     # Perform a bulk update once after processing all records

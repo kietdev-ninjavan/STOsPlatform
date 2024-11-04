@@ -14,8 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 def __get_breach_sla_shopee():
+    today = timezone.now().date()
     qs = ShopeeBacklog.objects.filter(
-        Q(aging_from_lost_threshold=0)
+        Q(shipper_date=today)
         & Q(rts=False)
         & ~Q(granular_status__in=[
             GranularStatusChoices.cancelled,
@@ -34,7 +35,7 @@ def __get_breach_sla_shopee():
 def __get_breach_sla_tiktok():
     today = timezone.now().date()
     qs = TiktokBacklog.objects.filter(
-        Q(date=today) &
+        Q(shipper_date=today) &
         Q(rts=False) &
         ~Q(granular_status__in=[
             GranularStatusChoices.cancelled,

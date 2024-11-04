@@ -118,7 +118,7 @@ def load_zone_info(tracking_ids):
     return tracking_zone_name_map
 
 
-def load_order_info():
+def load_ticket_change_address_order_info():
     tickets = TicketChangeAddress.objects.filter(
         Q(action__isnull=True)
     )

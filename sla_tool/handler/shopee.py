@@ -180,6 +180,19 @@ def collect_shopee_backlogs():
     __get_backlog_data(gsheet_service, "RV")
 
 
+def create_shipper_date():
+    """
+    Create shipper date for Shopee Backlog records.
+    """
+    # Get all Shopee Backlog records without shipper date
+    shopee_backlogs = ShopeeBacklog.objects.filter(
+        Q(shipper_date__isnull=True) &
+        Q(aging_from_lost_threshold=0)
+    )
+
+    shopee_backlogs.update(shipper_date=timezone.now().date())
+
+
 def update_shopee_order_info_form_opv2():
     # Initialize Order Service
     order_service = OrderService(logger=logger)
