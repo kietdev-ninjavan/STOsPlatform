@@ -11,7 +11,7 @@ from .handler.change_address.collect_data import (
 )
 from .handler.change_address.detect import detect_address
 from .handler.change_address.manual import manual_ticket_have_alo_link
-from .handler.change_address.output import out_to_gsheet as change_address_out_to_gsheet
+from .handler.change_address.output import out_to_gsheet_change_address
 from .handler.change_address.resolve import (
     resolved_rts_and_last_status,
     resolved_ticket_system_create,
@@ -96,9 +96,9 @@ def resolved_ticket_incorrect_format_task(*args, **kwargs):
     resolved_ticket_incorrect_format()
 
 
-@shared_task(name='[Change Address] out_to_gsheet_task', base=STOsTask, once={'graceful': True})
+@shared_task(name='[Change Address] change_address_out_to_gsheet_task', base=STOsTask, once={'graceful': True})
 def change_address_out_to_gsheet_task(*args, **kwargs):
-    change_address_out_to_gsheet()
+    out_to_gsheet_change_address()
 
 
 @shared_task(name='[Change Address] Handler Ticket Change Address', base=STOsTask, once={'graceful': True})

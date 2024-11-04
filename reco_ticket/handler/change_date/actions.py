@@ -141,7 +141,7 @@ def incorrect_format_date():
 def approve_tickets():
     tickets = TicketChangeDate.objects.filter(
         Q(action__isnull=True) &
-        Q(detected_date=timezone.now().date())
+        Q(detected_date__isnull=False)
     )
 
     if not tickets.exists():

@@ -10,7 +10,7 @@ from ...models import TicketChangeAddress
 logger = logging.getLogger(__name__)
 
 
-def out_to_gsheet():
+def out_to_gsheet_change_address():
     queryset = TicketChangeAddress.objects.filter(Q(out_sheet=False) & Q(action__isnull=False)).select_related('detect').values(
         'tracking_id',
         'order_id',
