@@ -11,7 +11,7 @@ from ..models import ExtendSLATracking
 logger = logging.getLogger(__name__)
 
 
-def collect_extend_sla(file_name=None):
+def collect_extend_sla():
     """
     Collects and stores the extend SLA tracking IDs.
     """
@@ -22,8 +22,7 @@ def collect_extend_sla(file_name=None):
 
     # Find file csv
     two_days_ago = timezone.now() - timezone.timedelta(days=2)
-    if not file_name:
-        file_name = f'{two_days_ago.strftime("%Y-%m-%d")}-master'
+    file_name = f'{two_days_ago.strftime("%Y-%m-%d")}-master'
     files = gdrive_service.get_file_by_name(file_name)
 
     if not files:

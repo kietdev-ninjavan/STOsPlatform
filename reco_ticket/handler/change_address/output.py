@@ -4,6 +4,7 @@ import pandas as pd
 from django.db.models import Q
 
 from google_wrapper.services import GoogleSheetService
+from google_wrapper.utils import get_service_account
 from stos.utils import configs
 from ...models import TicketChangeAddress
 
@@ -72,7 +73,7 @@ def out_to_gsheet_change_address():
 
     # Add to Google Sheet
     gsheet_svr = GoogleSheetService(
-        service_account=configs.get('GSA_WORKER01'),
+        service_account=get_service_account(configs.get('GSA_WORKER01')),
         spreadsheet_id='1CCUgd6JJdEH2uhg6yTB8rKErCHIEXKcKXLVD6V2p70E',
         logger=logger
     )
