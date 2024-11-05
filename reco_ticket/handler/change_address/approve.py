@@ -17,6 +17,8 @@ def __normalize_text(text):
 
 
 def __check_vietnamese_substring(a, b):
+    if not a or not b:
+        return False
     try:
         a = __normalize_text(a)
         b = __normalize_text(b)
