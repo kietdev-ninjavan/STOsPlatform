@@ -16,6 +16,10 @@ def calculate_sla_date_shopee():
     # Fetch all necessary ShopeeBacklog and ExtendSLATracking objects
     shopee_backlogs = ShopeeBacklog.objects.filter(Q(shipper_date=timezone.now().date()))
 
+    if not shopee_backlogs.exists():
+        logger.info("No Shopee backlogs to update.")
+        return
+
     # Fetch ExtendSLATracking and create a lookup dictionary by tracking_id
     extend_sla_tracking = ExtendSLATracking.objects.filter(
         tracking_id__in=shopee_backlogs.values_list('tracking_id', flat=True)
@@ -55,7 +59,7 @@ def calculate_sla_date_tiktok():
     update_list = []
     for backlog in tiktok_backlogs:
         backlog.extend_days = 2
-        backlog.extended_date = backlog.date + timezone.timedelta(days=2)
+        backlog.extended_date = backlog.shipper_date + timezone.timedelta(days=2)
         update_list.append(backlog)
 
     # Perform a bulk update once after processing all records

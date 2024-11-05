@@ -191,6 +191,7 @@ def create_shipper_date():
     )
 
     shopee_backlogs.update(shipper_date=timezone.now().date())
+    logger.info(f'Successfully updated {shopee_backlogs.count()} Shopee Backlog records with shipper date.')
 
 
 def update_shopee_order_info_form_opv2():

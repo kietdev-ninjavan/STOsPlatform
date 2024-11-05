@@ -37,8 +37,6 @@ def __get_breach_sla_tiktok():
 
 def get_out_extended_shopee_date():
     data = __get_breach_sla_shopee()
-    sp_tracking_ids = [t_id for t_id, _ in data]  # Extract tracking IDs only
-    logger.info(f'Found {len(sp_tracking_ids)} Shopee tracking IDs.')
 
     # Prepare DataFrame with both tracking_id and granular_status
     shopee_df = pd.DataFrame(data, columns=['backlog_type', 'tracking_id', 'shipper_date', 'extend_days', 'extended_date'])

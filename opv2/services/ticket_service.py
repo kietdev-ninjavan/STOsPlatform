@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Tuple
 
 from stos.utils import chunk_list
 from ..base import BaseService
@@ -52,7 +52,7 @@ class TicketService(BaseService):
 
         return 200, {'success': success, 'failed': failed}
 
-    def get_ticket_by_tracking_ids(self, tracking_ids: list) -> tuple:
+    def get_ticket_by_tracking_ids(self, tracking_ids: list) -> Tuple[int, List[TicketDTO]]:
         tickets = []
         for chunk in chunk_list(tracking_ids, 1000):
             url = f'{self._base_url}/ticketing/2.0/tickets/search?page=1&page_size=1000'

@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'redash.apps.RedashConfig',
     'network.apps.NetworkConfig',
     'reco_ticket.apps.RecoTicketConfig',
+    'driver.apps.DriverConfig',
     # 'pre_success.apps.PreSuccessConfig',
 ]
 
@@ -226,7 +227,7 @@ LOGGING = {
             'formatter': 'detailed',
         },
         'sla_tool': {
-            'level': LOG_LEVEL,
+            'level': "DEBUG",
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -234,7 +235,7 @@ LOGGING = {
             'version': "1",
         },
         'change_date': {
-            'level': LOG_LEVEL,
+            'level': "DEBUG",
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -242,7 +243,7 @@ LOGGING = {
             'version': "1",
         },
         'change_address': {
-            'level': LOG_LEVEL,
+            'level': "DEBUG",
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -250,7 +251,7 @@ LOGGING = {
             'version': "1",
         },
         'network': {
-            'level': LOG_LEVEL,
+            'level': "DEBUG",
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -265,22 +266,18 @@ LOGGING = {
     'loggers': {
         'network': {
             'handlers': ['console', 'network'],
-            'level': LOG_LEVEL,
             'propagate': False,
         },
         'sla_tool': {
             'handlers': ['console', 'sla_tool'],
-            'level': LOG_LEVEL,
             'propagate': False,
         },
         'reco_ticket.handler.change_date': {
             'handlers': ['console', 'change_date'],
-            'level': LOG_LEVEL,
             'propagate': False,
         },
         'reco_ticket.handler.change_address': {
             'handlers': ['console', 'change_address'],
-            'level': LOG_LEVEL,
             'propagate': False,
         },
     },
