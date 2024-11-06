@@ -35,7 +35,7 @@ def __get_breach_sla_shopee():
 def __get_breach_sla_tiktok():
     today = timezone.now().date()
     qs = TiktokBacklog.objects.filter(
-        Q(shipper_date=today) &
+        Q(extend_days=today) &
         Q(rts=False) &
         ~Q(granular_status__in=[
             GranularStatusChoices.cancelled,
