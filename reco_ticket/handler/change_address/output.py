@@ -34,6 +34,10 @@ def out_to_gsheet_change_address():
         'detect__ward',
     )
 
+    if not queryset.exists():
+        logger.info('No data to export')
+        return
+
     # Convert queryset to a list of dictionaries
     data = list(queryset)
 
@@ -64,9 +68,12 @@ def out_to_gsheet_change_address():
     })
 
     # Merge 'comments', 'notes', and 'exception_reason' into one 'notes' column
-    df['notes'] = df[['comments', 'notes', 'exception_reason']].apply(
-        lambda row: ' | '.join(filter(None, row)), axis=1
-    )
+    try:
+        df['notes'] = df[['comments', 'notes', 'exception_reason']].apply(
+            lambda row: ' | '.join(filter(None, row)), axis=1
+        )
+    except KeyError:
+        logger.error('Missing columns in DataFrame')
 
     # Drop the old 'comments', 'notes', and 'exception_reason' columns
     df = df.drop(columns=['comments', 'exception_reason'])

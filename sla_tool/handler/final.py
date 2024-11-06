@@ -30,7 +30,7 @@ def __get_breach_sla_tiktok():
     )
 
     # Extract tracking_id and granular_status as tuples
-    data = list(qs.values_list('shipper_date', 'tracking_id'))
+    data = list(qs.values_list('shipper_date', 'tracking_id', 'backlog_type'))
 
     return data
 
@@ -50,8 +50,7 @@ def get_out_extended_shopee_date():
 def get_breach_data():
     # TikTok
     tiktok_data = __get_breach_sla_tiktok()
-    tiktok_df = pd.DataFrame(tiktok_data, columns=['shipper_date', 'tracking_id'])
-    tiktok_df['backlog_type'] = 'Delivery'
+    tiktok_df = pd.DataFrame(tiktok_data, columns=['shipper_date', 'tracking_id', 'backlog_type'])
 
     # Shopee
     sp_data = __get_breach_sla_shopee()

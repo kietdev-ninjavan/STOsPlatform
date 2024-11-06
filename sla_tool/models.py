@@ -57,6 +57,7 @@ class TiktokBacklog(BaseOrder):
     ticket_no = models.BigIntegerField(null=True, blank=True)
     tracking_id = models.CharField(max_length=255, primary_key=True)
     date = models.DateField(null=True, blank=True)
+    backlog_type = models.CharField(max_length=255, null=True, blank=True)
     shipper_date = models.DateField(null=True, blank=True)
     extend_days = models.IntegerField(null=True, blank=True, default=2)
     extended_date = models.DateField(null=True, blank=True)
