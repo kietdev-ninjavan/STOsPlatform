@@ -113,6 +113,7 @@ def get_sla_need_call_filtered():
 
 def get_sla_need_call():
     now = timezone.now().date()
+    two_days_ago = now - timezone.timedelta(days=2)
     # TikTok
     tt_tracking_ids_and_status = __get_breach_sla_tiktok()
     tt_tracking_ids = [t_id for t_id, _ in tt_tracking_ids_and_status]
@@ -127,8 +128,7 @@ def get_sla_need_call():
     sp_tracking_ids = [t_id for t_id, _ in sp_tracking_ids_and_status]
 
     shopee_df = pd.DataFrame(sp_tracking_ids, columns=['TID'])
-    shopee_df['breach origin'] = now
-    shopee_df['day input'] = now
+    shopee_df['breach origin'] = two_days_ago.date()
     shopee_df['Shipper'] = 'Shopee'
 
     final_df = pd.concat([tiktok_df, shopee_df], ignore_index=True)

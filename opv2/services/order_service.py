@@ -2,8 +2,11 @@ import logging
 from datetime import datetime
 from typing import List, Tuple, Union, Dict
 
+from django.utils import timezone
+
 from stos.utils import chunk_list
 from ..base import BaseService
+from ..base.order import BaseOrder
 from ..dto import OrderDTO
 
 
@@ -100,3 +103,56 @@ class OrderService(BaseService):
             }
         }
         return self.make_request(url, method='PATCH', payload=payload)
+
+    def reschedule(self, orders: List[BaseOrder], date: datetime = None) -> Tuple[int, dict]:
+        """
+        Reschedule orders.
+
+        Args:
+            orders (List[OrderDTO]): List of orders to reschedule.
+            date (datetime, optional): The date to reschedule the orders to. Defaults to None.
+
+        Returns:
+            Tuple[int, int]: A tuple containing status code and the number of successfully rescheduled orders.
+        """
+        if not orders:
+            return 200, {}
+
+        success, fail = [], []
+        url = f"{self._base_url}/core/orders/reschedule-bulk"
+        for chunk in chunk_list(orders, 100):
+            payload = [
+                {
+                    "order_id": order.order_id,
+                    "tracking_id": order.tracking_id,
+                    "date": date.strftime('%Y-%m-%d') if date else timezone.now().strftime('%Y-%m-%d')
+                } for order in chunk
+            ]
+
+            status_code, result = self.make_request(url, method='POST', payload=payload)
+
+            if status_code != 200:
+                fail.extend([order.order_id for order in chunk])
+                self._logger.error(f"Failed to reschedule orders: {fail}")
+                continue
+
+            success.extend(result['data'].get('successful_order_ids', []))
+            fail.extend([order['order_id'] for order in result['data'].get('failed_orders', [])])
+
+        return 200, {"successful_orders": success, "failed_orders": fail}
+
+    def pull_route(self, order_id: int) -> tuple:
+        """
+        Pull route information for an order.
+
+        Args:
+            order_id (int): The order ID.
+
+        Returns:
+            Tuple[int, dict]: A tuple containing status code and response data.
+        """
+        url = f'{self._base_url}/core/2.0/orders/{order_id}/routes'
+        payload = {
+            "type": "DELIVERY"
+        }
+        return self.make_request(url, method='DELETE', payload=payload)

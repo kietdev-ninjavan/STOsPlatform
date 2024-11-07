@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'network.apps.NetworkConfig',
     'reco_ticket.apps.RecoTicketConfig',
     'driver.apps.DriverConfig',
+    'fail_pickup.apps.FailPickupConfig',
     # 'pre_success.apps.PreSuccessConfig',
 ]
 
@@ -227,7 +228,7 @@ LOGGING = {
             'formatter': 'detailed',
         },
         'sla_tool': {
-            'level': "DEBUG",
+            'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -235,7 +236,7 @@ LOGGING = {
             'version': "1",
         },
         'change_date': {
-            'level': "DEBUG",
+            'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -243,7 +244,7 @@ LOGGING = {
             'version': "1",
         },
         'change_address': {
-            'level': "DEBUG",
+            'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
@@ -251,13 +252,29 @@ LOGGING = {
             'version': "1",
         },
         'network': {
-            'level': "DEBUG",
+            'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
             'formatter': 'detailed',
             'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
             'tags': {"tool": "network"},
             'version': "1",
-        }
+        },
+        'pre_success': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "pre_success"},
+            'version': "1",
+        },
+        'fail_pickup': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "fail_pickup"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -280,6 +297,14 @@ LOGGING = {
             'handlers': ['console', 'change_address'],
             'propagate': False,
         },
+        'pre_success': {
+            'handlers': ['console', 'pre_success'],
+            'propagate': False,
+        },
+        'fail_pickup': {
+            'handlers': ['console', 'fail_pickup'],
+            'propagate': False,
+        }
     },
 }
 # endregion Logging

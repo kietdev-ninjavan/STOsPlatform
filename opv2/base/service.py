@@ -70,7 +70,7 @@ class TokenManager(metaclass=SingletonMeta):
             service_account = get_service_account(configs.get('GSA_SYSTEM'))
             gsheets_service = GoogleSheetService(
                 service_account=service_account,
-                spreadsheet_id=configs.get('OPV2_TOKEN_SPREADSHEET_ID'),
+                spreadsheet_id=configs.get('CONFIGS_SPREADSHEET_ID'),
                 logger=self.__logger
             )
             return gsheets_service.read_cell(
