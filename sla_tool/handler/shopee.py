@@ -233,7 +233,7 @@ def update_shopee_order_info_form_opv2():
             excluded_fields=['tracking_id', 'order_sn']
         )
         if is_updated:
-            order_has_changed.append(qs_order)
+            order_has_changed.append(existing_record)
 
     # Bulk update the orders in the database
     if order_has_changed:
