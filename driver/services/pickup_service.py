@@ -11,7 +11,7 @@ class PickupService(BaseService):
         Initialize the UploadService with a logger and a requests' session.
         """
         super().__init__(logger)
-        self.__base_url = 'https://walrus.ninjavan.co'
+        self.__base_url = 'https://walrus.ninjavan.co/vn'
 
     def pickup_fail(self, route_id: int, waypoint_id: int, contact: str, file_path: str, photo_url: str,
                     failure_reason_id: int, shipper_id: int, job_id: int, physical_items: list) -> tuple:

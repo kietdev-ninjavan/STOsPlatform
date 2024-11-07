@@ -1,10 +1,14 @@
 import os
+import textwrap
 from datetime import datetime
+from io import BytesIO
 from itertools import islice
 from typing import Dict, Optional
 from typing import List, Any, Generator, Tuple
 from unicodedata import normalize
 
+from PIL import Image, ImageDraw, ImageFont
+from django.conf import settings
 from django.utils import timezone
 
 from core.base.model import BaseModel
@@ -234,3 +238,76 @@ def swap_day_month_if_different(date: datetime) -> datetime:
             # Return original date if swap results in an invalid date
             return date
     return date
+
+
+def create_zns_image(data: Dict[str, Any], cell_height: int = 80, header_width: int = 260,
+                     cell_width: int = 540, font_size: int = 20,
+                     label_color: Tuple[int, int, int, int] = (94, 94, 94, 255),
+                     text_color: Tuple[int, int, int, int] = (0, 0, 0, 255),
+                     background_color: Tuple[int, int, int, int] = (255, 255, 255, 255),
+                     border_color: Tuple[int, int, int, int] = (224, 224, 224, 255)) -> bytes:
+    """
+    Generates a ZNS image displaying provided field labels and values.
+
+    Args:
+        data (Dict[str, Any]): Dictionary of labels and values to display.
+        cell_height (int, optional): Height of each cell. Defaults to 80.
+        header_width (int, optional): Width of label (header) column. Defaults to 260.
+        cell_width (int, optional): Width of value column. Defaults to 540.
+        font_size (int, optional): Font size for text. Defaults to 20.
+        label_color (Tuple[int, int, int, int], optional): RGBA color for labels. Defaults to gray.
+        text_color (Tuple[int, int, int, int], optional): RGBA color for values. Defaults to black.
+        background_color (Tuple[int, int, int, int], optional): RGBA background color. Defaults to white.
+        border_color (Tuple[int, int, int, int], optional): RGBA color for borders. Defaults to light gray.
+
+    Returns:
+        bytes: Binary data of the generated image in JPEG format.
+
+    Raises:
+        FileNotFoundError: If font files are not found in the specified directory.
+        IOError: If there is an issue creating or saving the image.
+    """
+    # Paths to font files
+    font_label_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'Roboto-Medium.ttf')
+    font_text_path = os.path.join(settings.BASE_DIR, 'static', 'fonts', 'Roboto-Light.ttf')
+    print(font_label_path)
+    try:
+        font_label = ImageFont.truetype(font_label_path, font_size)
+        font_text = ImageFont.truetype(font_text_path, font_size)
+    except IOError as e:
+        raise FileNotFoundError("Font files not found in the specified directory") from e
+
+    # Calculate image dimensions
+    num_rows = len(data)
+    image_width = header_width + cell_width
+    image_height = cell_height * num_rows
+
+    # Create image and draw object
+    image = Image.new('RGBA', (image_width, image_height), background_color)
+    draw = ImageDraw.Draw(image)
+
+    # Draw borders
+    for i in range(num_rows + 1):
+        y = i * cell_height
+        draw.line([(0, y), (image_width, y)], fill=border_color, width=2)
+    draw.line([(header_width, 0), (header_width, image_height)], fill=border_color, width=2)
+
+    # Draw labels and values
+    for row_index, (label, value) in enumerate(data.items()):
+        # Label position
+        label_x = 10
+        label_y = row_index * cell_height + 10
+        draw.text((label_x, label_y), label, font=font_label, fill=label_color)
+
+        # Value position (wrapped text)
+        value_x = header_width + 10
+        value_y = row_index * cell_height + 10
+        wrapped_text = textwrap.fill(str(value), width=40)
+        draw.text((value_x, value_y), wrapped_text, font=font_text, fill=text_color)
+
+    # Save to binary
+    output = BytesIO()
+    image.save(output, format="PNG")
+    output.seek(0)  # Reset position for reading
+
+    return output.getvalue()

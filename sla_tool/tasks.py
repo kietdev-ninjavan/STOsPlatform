@@ -1,6 +1,6 @@
 from celery import shared_task
 
-from core.base.task import STOsTask
+from core.base.task import STOsQueueOnce
 from .handler.calculate_sla import (
     calculate_sla_date_shopee,
     calculate_sla_date_tiktok
@@ -29,20 +29,20 @@ from .handler.tiktok import (
 )
 
 
-@shared_task(name='[SLA Tool] Handle Collect Call Data', base=STOsTask, once={'graceful': True})
+@shared_task(name='[SLA Tool] Handle Collect Call Data', base=STOsQueueOnce, once={'graceful': True})
 def collect_call_data_task():
     collect_breach_sla_call()
     collect_record_call()
 
 
-@shared_task(name='[SLA Tool] Handle Calculate SLA', base=STOsTask, once={'graceful': True})
+@shared_task(name='[SLA Tool] Handle Calculate SLA', base=STOsQueueOnce, once={'graceful': True})
 def collect_shopee_extend_sla_task():
     collect_extend_sla()
     calculate_sla_date_shopee()
     calculate_sla_date_tiktok()
 
 
-@shared_task(name='[SLA Tool] Handle Find Missing Call', base=STOsTask, once={'graceful': True})
+@shared_task(name='[SLA Tool] Handle Find Missing Call', base=STOsQueueOnce, once={'graceful': True})
 def find_missing_call_task():
     # Shopee
     collect_shopee_backlogs()
@@ -58,7 +58,7 @@ def find_missing_call_task():
     out_to_bi_sheet()
 
 
-@shared_task(name='[SLA Tool] Import Final Sheet', base=STOsTask, once={'graceful': True})
+@shared_task(name='[SLA Tool] Import Final Sheet', base=STOsQueueOnce, once={'graceful': True})
 def import_final_sheet():
     out_shopee_extended_date()
     out_breach_data()

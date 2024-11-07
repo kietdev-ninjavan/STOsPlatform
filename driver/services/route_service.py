@@ -9,7 +9,7 @@ class RouteService(BaseService):
         Initialize the UploadService with a logger and a requests' session.
         """
         super().__init__(logger)
-        self.__base_url = 'https://walrus.ninjavan.co'
+        self.__base_url = 'https://walrus.ninjavan.co/vn'
 
     def fetch_route(self) -> tuple:
         url = f"{self.__base_url}/driver/3.0/routes"

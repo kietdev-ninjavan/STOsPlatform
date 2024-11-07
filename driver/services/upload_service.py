@@ -11,7 +11,7 @@ class UploadService(BaseService):
         Initialize the UploadService with a logger and a requests' session.
         """
         super().__init__(logger)
-        self.__base_url = 'https://walrus.ninjavan.co'
+        self.__base_url = 'https://walrus.ninjavan.co/vn'
 
     def __signed_url(self, route_id: int, waypoint_id: int) -> tuple:
         """
@@ -24,7 +24,7 @@ class UploadService(BaseService):
             "route_id": route_id,
             "waypoint_id": waypoint_id
         }
-        url = f"{self.__base_url}/vn/driver/1.0/photos/signed-url/upload"
+        url = f"{self.__base_url}/driver/1.0/photos/signed-url/upload"
         return self.make_request(url, method='POST', payload=payload)
 
     def __google_upload(self, signed_url: str, file_path: str = None, content: bytes = None) -> tuple:
@@ -69,7 +69,7 @@ class UploadService(BaseService):
             return status_code, response
 
         # Upload to NJV system
-        url = f"{self.__base_url}/vn/driver/1.0/photos"
+        url = f"{self.__base_url}/driver/1.0/photos"
         payload = {
             "bucket": f"{bucket}",
             "commit_date": int(timezone.now().timestamp()) * 1000,

@@ -2,7 +2,7 @@ import time
 
 from celery import shared_task
 
-from core.base.task import STOsTask
+from core.base.task import STOsQueueOnce
 from .handler.change_address.approve import (
     approve_hcm_dn_hn,
     approve_map_2_level
@@ -40,7 +40,7 @@ from .handler.change_date.collect_data import (
 from .handler.change_date.detect import detect_date
 
 
-@shared_task(name='[Reco Ticket] Handle Ticket Change Address', base=STOsTask, once={'graceful': True})
+@shared_task(name='[Reco Ticket] Handle Ticket Change Address', base=STOsQueueOnce, once={'graceful': True})
 def handle_change_address_task():
     collect_ticket_change_address()
     manual_ticket_have_alo_link()
@@ -60,7 +60,7 @@ def handle_change_address_task():
     out_to_gsheet_change_address()
 
 
-@shared_task(name='[Reco Ticket] Handle Ticket Change Date', base=STOsTask, once={'graceful': True})
+@shared_task(name='[Reco Ticket] Handle Ticket Change Date', base=STOsQueueOnce, once={'graceful': True})
 def handle_change_date_task():
     collect_ticket_change_date()
     load_order_info_change_date()
@@ -74,6 +74,6 @@ def handle_change_date_task():
     incorrect_format_date()
 
 
-@shared_task(name='[Reco Ticket] Handle Ticket Change Date Apply Action', base=STOsTask, once={'graceful': True})
+@shared_task(name='[Reco Ticket] Handle Ticket Change Date Apply Action', base=STOsQueueOnce, once={'graceful': True})
 def handle_change_date_apply_action_task():
     apply_action()
