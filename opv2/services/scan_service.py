@@ -1,5 +1,4 @@
 import logging
-from typing import Tuple
 
 from django.utils import timezone
 

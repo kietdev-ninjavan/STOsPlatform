@@ -21,7 +21,7 @@ def __create_route():
     stt_code, route_id = route_service.create_route(driver_id=1682343)
 
     if stt_code != 201:
-        logger.error(f'Failed to create route for driver')
+        logger.error('Failed to create route for driver')
         raise Exception(f'Failed to create route as {route_id}')
 
     try:
@@ -32,7 +32,7 @@ def __create_route():
             )
     except Exception as e:
         logger.error(f'Failed to create route in database: {e}')
-        raise Exception(f'Failed to create route in database')
+        raise Exception('Failed to create route in database')
 
     return route_id
 
@@ -93,7 +93,7 @@ def job_routing():
         logger.info(f'Successfully updated {success} records')
     except Exception as e:
         logger.error(f'Failed to update records: {e}')
-        raise Exception(f'Failed to update records')
+        raise Exception('Failed to update records')
 
     # Collect job info
     logger.info('Collecting job info after routing delay 10s')
@@ -164,4 +164,4 @@ def archive_route():
             routes.update(archived=True)
     except Exception as e:
         logger.error(f'Failed to archive route in database: {e}')
-        raise Exception(f'Failed to archive route in database')
+        raise Exception('Failed to archive route in database')

@@ -32,7 +32,7 @@ def _build_report_card(total, fail_success, ops_overwrite, not_ready, total_pack
 
     # Card Section
     section = Section()
-    section.header = f'<font color=\"#156311\">Report</font>'
+    section.header = '<font color=\"#156311\">Report</font>'
 
     # Widgets with task details
     section.add_widget(W.TextParagraph(f'<b>Failed Jobs:</b> {fail_success}/{total}'))
