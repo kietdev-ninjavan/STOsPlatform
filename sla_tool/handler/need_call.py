@@ -113,13 +113,12 @@ def get_sla_need_call_filtered():
 
 def get_sla_need_call():
     now = timezone.now().date()
-    two_days_ago = now - timezone.timedelta(days=2)
     # TikTok
     tt_tracking_ids_and_status = __get_breach_sla_tiktok()
     tt_tracking_ids = [t_id for t_id, _ in tt_tracking_ids_and_status]
 
     tiktok_df = pd.DataFrame(tt_tracking_ids, columns=['TID'])
-    tiktok_df['breach origin'] = two_days_ago
+    tiktok_df['breach origin'] = now
     tiktok_df['day input'] = now
     tiktok_df['Shipper'] = 'Tiktok'
 
