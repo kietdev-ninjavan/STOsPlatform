@@ -13,14 +13,14 @@ def collect_job_data_task():
     collect_job_info()
 
 
-@shared_task(base=STOsQueueOnce, name='[Fail Pickup] Routing And Collect Packets', once={'graceful': True})
+@shared_task(base=STOsQueueOnce, name='[Fail Pickup] Routing', once={'graceful': True})
 def routing_and_collect_packets():
     job_routing()
-    collect_packets()
 
 
 @shared_task(base=STOsQueueOnce, name='[Fail Pickup] Start Fail KLL Job Task', once={'graceful': True})
 def fail_all_job_task():
+    collect_packets()
     start_route()
     fail_job_sh()
     fail_job_kll()
