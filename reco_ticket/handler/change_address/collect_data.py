@@ -8,7 +8,7 @@ from simple_history.utils import bulk_create_with_history, bulk_update_with_hist
 from network.models import Zone
 from opv2.services import OrderService, GraphQLService
 from redash.client import RedashClient
-from stos.utils import configs, chunk_list
+from stos.utils import configs, chunk_list, check_record_change
 from ...models import TicketChangeAddress
 
 logger = logging.getLogger(__name__)
@@ -31,12 +31,10 @@ def collect_ticket_change_address():
         ticket_ids = [ticket['ticket_id'] for ticket in chunk]
 
         # Get the existing tickets
-        existing_tickets = TicketChangeAddress.objects.filter(ticket_id__in=ticket_ids).values_list('ticket_id', flat=True)
-        new_tickets = []
+        existing_tickets = TicketChangeAddress.objects.filter(ticket_id__in=ticket_ids)
+        existing_tickets_map = {f'{ticket.ticket_id}': ticket for ticket in existing_tickets}
+        new_tickets, update_tickets = [], []
         for ticket in chunk:
-            if ticket['ticket_id'] in existing_tickets:
-                continue
-
             try:
                 ticket = TicketChangeAddress(
                     ticket_id=ticket.get('ticket_id'),
@@ -56,15 +54,44 @@ def collect_ticket_change_address():
                     first_attempt_date=ticket.get('date_of_1st_delivery_fail'),
 
                 )
-                new_tickets.append(ticket)
             except Exception as e:
                 logger.error(f"Error creating ticket {ticket['ticket_id']}: {e}")
                 continue
 
-        success = bulk_create_with_history(new_tickets, TicketChangeAddress, batch_size=1000, ignore_conflicts=True)
+            existing_ticket = existing_tickets_map.get(f'{ticket.ticket_id}')
+            if existing_ticket:
+                s_updated, existing_record, _ = check_record_change(
+                    existing_record=existing_ticket,
+                    updated_record=ticket,
+                )
 
-        total_success += len(success)
-        logger.info(f"Successfully inserted {len(success)} tickets change address records.")
+                if s_updated:
+                    update_tickets.append(existing_record)
+            else:
+                new_tickets.append(ticket)
+
+        try:
+            if new_tickets:
+                success = bulk_create_with_history(new_tickets, TicketChangeAddress, batch_size=1000, ignore_conflicts=True)
+                total_success += len(success)
+                logger.info(f"Successfully inserted {len(success)} tickets change address records.")
+            else:
+                logger.info("No new tickets to insert.")
+
+            if update_tickets:
+                success = bulk_update_with_history(
+                    update_tickets,
+                    TicketChangeAddress,
+                    batch_size=1000,
+                    fields=['investigating_hub_id', 'comments', 'notes', 'exception_reason', 'province']
+                )
+                total_success += success
+                logger.info(f"Updated {success} tickets change address records.")
+            else:
+                logger.info("No tickets to update.")
+        except Exception as e:
+            logger.error(f"Error during bulk operations: {e}")
+            raise e
 
     logger.info(f'Successfully inserted {total_success}/{total_tickets} tickets change address records.')
 
