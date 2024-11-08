@@ -119,7 +119,7 @@ def get_sla_need_call():
     tt_tracking_ids = [t_id for t_id, _ in tt_tracking_ids_and_status]
 
     tiktok_df = pd.DataFrame(tt_tracking_ids, columns=['TID'])
-    tiktok_df['breach origin'] = now
+    tiktok_df['breach origin'] = two_days_ago
     tiktok_df['day input'] = now
     tiktok_df['Shipper'] = 'Tiktok'
 
@@ -128,7 +128,8 @@ def get_sla_need_call():
     sp_tracking_ids = [t_id for t_id, _ in sp_tracking_ids_and_status]
 
     shopee_df = pd.DataFrame(sp_tracking_ids, columns=['TID'])
-    shopee_df['breach origin'] = two_days_ago
+    shopee_df['breach origin'] = now
+    shopee_df['day input'] = now
     shopee_df['Shipper'] = 'Shopee'
 
     final_df = pd.concat([tiktok_df, shopee_df], ignore_index=True)
