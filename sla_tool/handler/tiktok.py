@@ -83,7 +83,7 @@ def update_tiktok_order_info_form_opv2():
 
     # Get all tracking IDs from the database
     qs_orders = TiktokBacklog.objects.filter(
-        Q(date=timezone.now().date())
+        Q(extended_date=timezone.now().date())
     )
 
     if not qs_orders.exists():
