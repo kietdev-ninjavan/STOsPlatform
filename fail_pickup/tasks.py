@@ -7,14 +7,10 @@ from .handler.report import report_fail_job
 from .handler.routing import job_routing, start_route, archive_route
 
 
-@shared_task(base=STOsQueueOnce, name='[Fail Pickup] Collect Job Data', once={'graceful': True})
+@shared_task(base=STOsQueueOnce, name='[Fail Pickup] Collect Job Data And Routing', once={'graceful': True})
 def collect_job_data_task():
     collect_job_data()
     collect_job_info()
-
-
-@shared_task(base=STOsQueueOnce, name='[Fail Pickup] Routing', once={'graceful': True})
-def routing_and_collect_packets():
     job_routing()
 
 
