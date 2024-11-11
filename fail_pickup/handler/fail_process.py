@@ -33,8 +33,10 @@ def __make_physical_items(orders, reason_id, shipper_id):
 
 
 @shared_task(base=STOsParallel, name='[Fail Pickup] Fail Pickup Jobs')
-def fail_job_task(job_ids: List[int], reason_id: int):
-    # Init Driver Service
+def fail_job_task(job_ids: List[int] = None, reason_id: int = None):
+    if not job_ids or not reason_id:
+        return
+        # Init Driver Service
     upload_service = UploadService()
     pickup_service = PickupService()
 
