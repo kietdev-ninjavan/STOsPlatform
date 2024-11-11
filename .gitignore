@@ -7,6 +7,7 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+!/static/*
 .Python
 build/
 develop-eggs/
@@ -15,9 +16,7 @@ downloads/
 eggs/
 .eggs/
 lib/
-!/static/lib/
 lib64/
-!/static/lib64/
 parts/
 sdist/
 var/
@@ -178,4 +177,3 @@ cython_debug/
 *.diff
 /logs/
 /staticfiles/
-!/static/
