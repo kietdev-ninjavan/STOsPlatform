@@ -147,6 +147,7 @@ To run the project locally, follow the steps below:
 Go to admin page and add the configuration for each app
 
 - [OPv2](opv2/README.md)
+- [Fail Pickup](fail_pickup/README.md)
 
 ---
 
