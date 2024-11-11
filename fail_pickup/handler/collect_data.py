@@ -44,7 +44,7 @@ def collect_job_data():
 
         new_records = []
         for index, row in enumerate(chunk):
-            job_id = row.get('pickup_job_id')
+            job_id = row.get('job_id')
 
             # Skip if record already exists
             if job_id in existing_job_ids:
@@ -53,11 +53,11 @@ def collect_job_data():
             try:
                 new_records.append(PickupJob(
                     job_id=job_id,
-                    shipper_id=row.get('shipper_id'),
-                    shipper_name=row.get('shipper_name'),
-                    contact=row.get('shipper_contact'),
-                    pickup_schedule_date=parse_datetime(row.get('pickup_schedule_date')),
-                    shipper_address=row.get('shipper_address'),
+                    shipper_id=row.get('global_shipper_id'),
+                    shipper_name=row.get('shipper'),
+                    contact=row.get('contact'),
+                    pickup_schedule_date=parse_datetime(row.get('schedule_pickup_datetime')),
+                    shipper_address=row.get('pickup_address'),
                     call_center_status=row.get('call_center_status'),
                     call_center_sent_time=parse_datetime(row.get('call_center_sent_time')),
                 ))

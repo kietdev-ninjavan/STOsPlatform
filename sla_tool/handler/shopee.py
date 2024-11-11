@@ -199,7 +199,7 @@ def update_shopee_order_info_form_opv2():
     order_service = OrderService(logger=logger)
     # Get all tracking IDs from the database
     qs_orders = ShopeeBacklog.objects.filter(
-        Q(aging_from_lost_threshold__in=[0])
+        Q(shipper_date=timezone.now().date())
     )
 
     if not qs_orders.exists():
