@@ -47,6 +47,7 @@ def collect_job_data():
             try:
                 call_center_sent_time = parse_datetime(row.get('call_center_sent_time'))
             except Exception as e:
+                logger.warning(f"Failed to parse call_center_sent_time: {e}")
                 call_center_sent_time = None
 
             job_id = row.get('job_id')
