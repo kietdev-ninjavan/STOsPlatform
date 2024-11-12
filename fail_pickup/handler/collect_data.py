@@ -36,33 +36,45 @@ def collect_job_data():
         job_ids = [row.get('pickup_job_id') for row in chunk]
 
         # Get existing records to avoid duplicates
-        existing_job_ids = set(
-            PickupJob.objects.filter(
-                job_id__in=job_ids
-            ).values_list('job_id', flat=True)
+        existing_job_ids = PickupJob.objects.filter(
+            job_id__in=job_ids
         )
 
-        new_records = []
+        puj_map = {f'{puj.job_id}': puj for puj in existing_job_ids}
+
+        new_records, update_records = [], []
         for index, row in enumerate(chunk):
+            try:
+                call_center_sent_time = parse_datetime(row.get('call_center_sent_time'))
+            except Exception as e:
+                call_center_sent_time = None
+
             job_id = row.get('job_id')
 
-            # Skip if record already exists
-            if job_id in existing_job_ids:
+            new_puj = PickupJob(
+                job_id=job_id,
+                shipper_id=row.get('global_shipper_id'),
+                shipper_name=row.get('shipper'),
+                contact=row.get('contact'),
+                pickup_schedule_date=parse_datetime(row.get('schedule_pickup_datetime')),
+                shipper_address=row.get('pickup_address'),
+                call_center_status=row.get('call_center_status') if row.get('call_center_status') != '' else None,
+                call_center_sent_time=call_center_sent_time,
+            )
+
+            record = puj_map.get(f'{job_id}')
+
+            if record is None:
+                new_records.append(new_puj)
                 continue
 
-            try:
-                new_records.append(PickupJob(
-                    job_id=job_id,
-                    shipper_id=row.get('global_shipper_id'),
-                    shipper_name=row.get('shipper'),
-                    contact=row.get('contact'),
-                    pickup_schedule_date=parse_datetime(row.get('schedule_pickup_datetime')),
-                    shipper_address=row.get('pickup_address'),
-                    call_center_status=row.get('call_center_status'),
-                    call_center_sent_time=parse_datetime(row.get('call_center_sent_time')),
-                ))
-            except Exception as e:
-                logger.error(f"Failed to process row {index + 1}: {e}")
+            is_updated, existing_record, _ = check_record_change(
+                existing_record=record,
+                updated_record=new_puj,
+                excluded_fields=['tracking_id', 'order_sn']
+            )
+            if is_updated:
+                update_records.append(existing_record)
 
         # Bulk create new records
         if new_records:
@@ -71,6 +83,12 @@ def collect_job_data():
             success_records += len(success)
         else:
             logger.info("No new records to process.")
+        if update_records:
+            success = bulk_update_with_history(update_records, PickupJob,
+                                               ['shipper_id', 'shipper_name', 'contact', 'pickup_schedule_date', 'shipper_address',
+                                                'call_center_status', 'call_center_sent_time'], batch_size=1000)
+            logger.info(f"Successfully updated {success} records.")
+            success_records += success
 
     logger.info(f"Processed {success_records}/{total_records} records.")
 

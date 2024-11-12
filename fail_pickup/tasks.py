@@ -14,6 +14,11 @@ def collect_job_data_task():
     job_routing()
 
 
+@shared_task(base=STOsQueueOnce, name='[Fail Pickup] Collect ZNS Response', once={'graceful': True})
+def collect_zns_result():
+    collect_job_data()
+
+
 @shared_task(base=STOsQueueOnce, name='[Fail Pickup] Start Fail KLL Job Task', once={'graceful': True})
 def fail_all_job_task():
     collect_packets()
