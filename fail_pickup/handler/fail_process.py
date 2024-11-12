@@ -94,6 +94,7 @@ def fail_job_task(job_ids: List[int] = None, reason_id: int = None):
 def fail_job_kll():
     pickup_jobs = PickupJob.objects.filter(
         Q(created_date__date=timezone.now().date()) &
+        Q(call_center_sent_time__isnull=False) &
         Q(route_id__isnull=False) &
         Q(status=PickupJobStatusChoices.IN_PROGRESS) &
         Q(call_center_status='Fail') &
@@ -112,6 +113,7 @@ def fail_job_kll():
 def fail_job_sh():
     pickup_jobs = PickupJob.objects.filter(
         Q(created_date__date=timezone.now().date()) &
+        Q(call_center_sent_time__isnull=False) &
         Q(route_id__isnull=False) &
         Q(status=PickupJobStatusChoices.IN_PROGRESS) &
         Q(call_center_status='Success') &
