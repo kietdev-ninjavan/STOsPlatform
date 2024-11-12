@@ -65,17 +65,15 @@ def collect_job_data():
 
             record = puj_map.get(f'{job_id}')
 
-            if record is None:
+            if record:
+                is_updated, existing_record, _ = check_record_change(
+                    existing_record=record,
+                    updated_record=new_puj
+                )
+                if is_updated:
+                    update_records.append(existing_record)
+            else:
                 new_records.append(new_puj)
-                continue
-
-            is_updated, existing_record, _ = check_record_change(
-                existing_record=record,
-                updated_record=new_puj,
-                excluded_fields=['tracking_id', 'order_sn']
-            )
-            if is_updated:
-                update_records.append(existing_record)
 
         # Bulk create new records
         if new_records:
@@ -90,6 +88,8 @@ def collect_job_data():
                                                 'call_center_status', 'call_center_sent_time'], batch_size=1000)
             logger.info(f"Successfully updated {success} records.")
             success_records += success
+        else:
+            logger.info("No records to update.")
 
     logger.info(f"Processed {success_records}/{total_records} records.")
 
