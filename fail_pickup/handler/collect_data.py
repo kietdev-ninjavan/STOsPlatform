@@ -33,7 +33,7 @@ def collect_job_data():
     total_records = len(records)
     success_records = 0
     for chunk in chunk_list(records, 1000):
-        job_ids = [row.get('pickup_job_id') for row in chunk]
+        job_ids = [row.get('job_id') for row in chunk]
 
         # Get existing records to avoid duplicates
         existing_job_ids = PickupJob.objects.filter(
