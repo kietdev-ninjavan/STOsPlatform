@@ -96,7 +96,9 @@ def clear_temporary_file(file_path: str) -> None:
         raise e
 
 
-def parse_datetime(date_string: str, custom_formats: Optional[List[str]] = None) -> datetime:
+def parse_datetime(date_string: str, custom_formats: Optional[List[str]] = None) -> datetime | None:
+    if not date_string:
+        return None
     """
     Parses a date or datetime string into a datetime object using predefined or custom formats.
 
