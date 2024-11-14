@@ -24,7 +24,7 @@ def collect_vendor_call_data():
         logger=logger
     )
 
-    records = gsheet_service.get_all_records(configs.get('PSS_VENDOR_WORKSHEET_ID'))
+    records = gsheet_service.get_all_records(configs.get('PSS_VENDOR_WORKSHEET_ID', cast=int))
 
     if not records:
         logger.info("No data found in the Google Sheet")
@@ -182,7 +182,7 @@ def load_ticket_info_sla():
         Q(created_date__date=timezone.now().date()) &
         Q(project_call__icontains='Breach SLA') &
         Q(route__isnull=True) &
-        Q(ticket_id__isnull=False)
+        Q(ticket_id__isnull=True)
     )
 
     if not orders:
