@@ -137,8 +137,10 @@ def start_route():
 
     for route in routes:
         total_orders = route.orders.count()
-        tracking_ids = [order.tracking_id for order in route.orders.filter(~Q(granular_status=GranularStatusChoices.on_vehicle))]
-        waypoint_ids = [order.waypoint_id for order in route.orders.filter(~Q(granular_status=GranularStatusChoices.on_vehicle))]
+        tracking_ids = [order.tracking_id for order in
+                        route.orders.filter(Q(granular_status__in=[GranularStatusChoices.arrived_sorting, GranularStatusChoices.en_route]))]
+        waypoint_ids = [order.waypoint_id for order in
+                        route.orders.filter(Q(granular_status__in=[GranularStatusChoices.arrived_sorting, GranularStatusChoices.en_route]))]
         if not tracking_ids:
             logger.info(f"Route started {total_orders - len(tracking_ids)}/{total_orders} orders. Skipping route {route.route_id}")
             continue
