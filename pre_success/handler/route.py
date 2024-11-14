@@ -352,6 +352,8 @@ def fetch_route():
                     with transaction.atomic():
                         route.archived = True
                         route.save()
+                        route.driver.free = True
+                        route.driver.save()
                         logger.info(f"Successfully archived route {route.route_id}")
 
                         # region Notify
