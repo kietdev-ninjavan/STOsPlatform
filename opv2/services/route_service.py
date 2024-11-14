@@ -110,6 +110,7 @@ class RouteService(BaseService):
 
         :param route_id: route id
         :return: Status code (int) and result (dict)
+        success: 204
         """
         url = f"{self._base_url}/route-v2/routes/{route_id}/archive"
         return self.make_request(url, method='PUT')
@@ -134,7 +135,7 @@ class RouteService(BaseService):
 
         Returns:
             Tuple[int, dict]: A tuple containing status code and response data
-            success: 200
+            success: 204
         """
 
         url = f'{self._base_url}/route-v2/routes/{route_id}/orders/{order_id}?route_source=ADD_BY_ORDER&transaction_type=DELIVERY'

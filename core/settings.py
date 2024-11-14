@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'reco_ticket.apps.RecoTicketConfig',
     'driver.apps.DriverConfig',
     'fail_pickup.apps.FailPickupConfig',
-    # 'pre_success.apps.PreSuccessConfig',
+    'pre_success.apps.PreSuccessConfig',
 ]
 
 MIDDLEWARE = [

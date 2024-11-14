@@ -173,6 +173,36 @@ class GoogleSheetService:
             self.__handle_api_error(error)
 
     @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def search_cell(self, value: str, worksheet: Union[int, str, gspread.Worksheet], in_row: Optional[int] = None,
+                    in_column: Optional[int] = None, ) -> Tuple[int, int]:
+        """
+        Search for a specific value in the worksheet and return the cell coordinates.
+
+        Args:
+            value (str): The value to search for.
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to search in.
+            in_row (Optional[int], optional): The row to search in. Defaults to None.
+            in_column (Optional[int], optional): The column to search in. Defaults to None.
+
+        Returns:
+            Tuple[int, int]: The (row, column) coordinates of the cell.
+
+        Raises:
+            ValueError: If the worksheet is not a recognized type.
+            APIError: If an API error occurs during the search.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            cell = worksheet.find(value, in_row=in_row, in_column=in_column)
+            self.__logger.info(f"Found value '{value}' in cell '{cell}' in worksheet '{worksheet.title}'.")
+            return cell.row, cell.col
+        except APIError as error:
+            self.__handle_api_error(error)
+        except Exception as error:
+            raise error
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
     def update_cell(self, cell: Union[str, Tuple[int, int]], value: str,
                     worksheet: Union[int, str, gspread.Worksheet]) -> None:
         """
@@ -376,3 +406,87 @@ class GoogleSheetService:
                 self.__logger.info(f"Replaced data in worksheet '{worksheet.title}' with new DataFrame.")
         except APIError as error:
             self.__handle_api_error(error)
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def duplicate_worksheet(self, source_worksheet: Union[int, str, gspread.Worksheet], new_worksheet_name: str) -> gspread.Worksheet:
+        """
+        Duplicate an existing worksheet to create a new worksheet with the specified name.
+
+        Args:
+            source_worksheet (Union[int, str, gspread.Worksheet]): The source worksheet to duplicate.
+            new_worksheet_name (str): The name of the new worksheet to create.
+
+        Raises:
+            ValueError: If the worksheet type is invalid.
+            APIError: If an API error occurs during the duplication.
+        """
+        source_worksheet = self.__get_worksheet(source_worksheet)
+        exist_worksheets = self.__spreadsheet.worksheets()
+
+        # Check if the new worksheet name already exists skip
+        worksheet_titles = [worksheet.title for worksheet in exist_worksheets]
+        if new_worksheet_name in worksheet_titles:
+            self.__logger.warning(f"Worksheet '{new_worksheet_name}' already exists in the spreadsheet.")
+            return self.__spreadsheet.worksheet(new_worksheet_name)
+
+        try:
+            # Duplicate the source worksheet
+            new_worksheet = source_worksheet.duplicate(insert_sheet_index=len(exist_worksheets) + 1,
+                                                       new_sheet_name=new_worksheet_name)
+            self.__logger.info(f"Duplicated worksheet '{source_worksheet.title}' to '{new_worksheet.title}'.")
+            return new_worksheet
+        except APIError as error:
+            self.__handle_api_error(error)
+        except Exception as error:
+            raise error
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def clear_column(self, worksheet: Union[int, str, gspread.Worksheet], column: int, start_row: int = 1) -> None:
+        """
+        Clear a specific column in the worksheet starting from the specified row.
+
+        Args:
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to clear.
+            column (int): The column number to clear.
+            start_row (int): The row to start clearing from.
+
+        Raises:
+            ValueError: If the worksheet type is invalid.
+            APIError: If an API error occurs during the clearing.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            # Clear the column starting from the specified row
+            cell_list = worksheet.range(start_row, column, worksheet.row_count, column)
+            for cell in cell_list:
+                cell.value = ""
+
+            worksheet.update_cells(cell_list)
+            self.__logger.info(f"Cleared column '{column}' in worksheet '{worksheet.title}' from row {start_row}.")
+        except APIError as error:
+            self.__handle_api_error(error)
+        except Exception as error:
+            raise error
+
+    @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
+    def clear_worksheet(self, worksheet: Union[int, str, gspread.Worksheet]) -> None:
+        """
+        Clear all content from the worksheet.
+
+        Args:
+            worksheet (Union[int, str, gspread.Worksheet]): The worksheet to clear.
+
+        Raises:
+            ValueError: If the worksheet type is invalid.
+            APIError: If an API error occurs during the clearing.
+        """
+        worksheet = self.__get_worksheet(worksheet)
+
+        try:
+            worksheet.clear()
+            self.__logger.info(f"Cleared all content from worksheet '{worksheet.title}'.")
+        except APIError as error:
+            self.__handle_api_error(error)
+        except Exception as error:
+            raise error
