@@ -7,6 +7,7 @@ from opv2.base.route import BaseRoute, BaseDriver
 class ShipperGroup(models.TextChoices):
     tiktok = "TikTok Domestic"
     shopee = "Shopee"
+    ttid = "TTDI"
     unknown = "Unknown"
 
 
