@@ -125,7 +125,7 @@ class GenminiAIService:
             str: The cleaned response text.
         """
         if '```json' in response:
-            cleaned_text = response.replace('```json', '').replace('```', '').replace("'", '"').strip()
+            cleaned_text = response.replace('```json', '').replace('```', '').strip()
         else:
             cleaned_text = response.strip()
         return cleaned_text
