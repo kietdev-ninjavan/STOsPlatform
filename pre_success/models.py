@@ -32,9 +32,6 @@ class Route(BaseRoute):
         verbose_name = 'Pre Success Route'
         verbose_name_plural = 'Pre Success Routes'
 
-    def __str__(self):
-        return f"Route {self.id}"
-
 
 class Order(BaseOrder):
     waypoint_id = models.BigIntegerField(null=True, blank=True)
@@ -59,6 +56,3 @@ class Order(BaseOrder):
         constraints = [
             models.UniqueConstraint(fields=['tracking_id', 'project_call'], name='unique_tracking_project')
         ]
-
-    def __str__(self):
-        return self.tracking_id
