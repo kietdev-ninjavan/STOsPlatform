@@ -61,7 +61,7 @@ def detect_address():
 
         data.append({
             "ticket_id": ticket.ticket_id,
-            "text": f"{content}",
+            "text": f"{content}".replace('"', "'"),
         })
 
     detected_data = []
