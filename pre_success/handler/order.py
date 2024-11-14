@@ -140,3 +140,4 @@ def __add_orders_to_route(shipper_group: ShipperGroup):
 def routing_orders():
     __add_orders_to_route(ShipperGroup.shopee)
     __add_orders_to_route(ShipperGroup.tiktok)
+    __add_orders_to_route(ShipperGroup.ttid)
