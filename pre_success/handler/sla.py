@@ -69,6 +69,5 @@ def cancel_ticket_missing():
         logger.error("Failed to cancel ticket missing")
         return
     success = result.get('success', [])
-    logger.info(f"Cancel ticket missing successfully: {success}")
     failed = result.get('failed', [])
-    logger.error(f"Failed to cancel ticket missing: {failed}")
+    logger.info(f"Successfully cancel missing tickets: success={success}, failed={failed}")

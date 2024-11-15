@@ -60,7 +60,7 @@ def add_to_pod(driver_name, shipper_group, tracking_ids, new_route=False):
         )
         gsheet_service.update_cell(
             cell=(column, 2),
-            value=shipper_group,
+            value=shipper_group if shipper_group != 'TTDI' else 'TikTok Domestic',
             worksheet=worksheet_id
         )
         gsheet_service.update_column(
