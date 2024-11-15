@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from opv2.base.order import TagChoices
 from opv2.services import OrderService
+from .output import out_to_sheet
 from .report import report_add_tag
 from ...models import PriorB2B
 
@@ -37,4 +38,12 @@ def add_tag():
 
     logger.info("Tag added successfully.")
 
-    report_add_tag(len(orders), len(success), failed)
+    try:
+        report_add_tag(len(orders), len(success), failed)
+    except Exception as e:
+        logger.error(f"Error while reporting: {e}")
+
+    try:
+        out_to_sheet([order.tracking_id for order in orders if order.order_id in success])
+    except Exception as e:
+        logger.error(f"Error while output to sheet: {e}")
