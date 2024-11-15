@@ -16,7 +16,8 @@ from .handler.route import (
 )
 from .handler.sla import (
     pull_route_ovfd,
-    cancel_ticket_missing
+    cancel_ticket_missing,
+    create_ms_ticket_again
 )
 
 
@@ -57,3 +58,8 @@ def sla_task():
     parcel_sweeper_live()
     routing_orders()
     fetch_task.apply_async()
+
+
+@shared_task(name='[Pre Success] Create MS Ticket Again', base=STOsQueueOnce, once={'graceful': True})
+def creat_ms_again_task():
+    create_ms_ticket_again()
