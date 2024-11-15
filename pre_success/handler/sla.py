@@ -4,7 +4,8 @@ from django.db.models import Q
 from django.utils import timezone
 
 from opv2.base.order import GranularStatusChoices
-from opv2.dto import CancelTicketDTO
+from opv2.base.ticket import TicketTypeChoices
+from opv2.dto import CancelTicketDTO, TicketCreateDTO
 from opv2.services import TicketService
 from .collect_data import load_order_info
 from .order import pull_route
@@ -71,3 +72,43 @@ def cancel_ticket_missing():
     success = result.get('success', [])
     failed = result.get('failed', [])
     logger.info(f"Successfully cancel missing tickets: success={success}, failed={failed}")
+
+
+def create_ms_ticket_again():
+    yesterday = timezone.now().date() - timezone.timedelta(days=1)
+    # Get all order have ticket missing cancel
+    orders = Order.objects.filter(
+        Q(created_date__date=yesterday)
+        & Q(ticket_id__isnull=False)
+        & Q(route_id__isnull=False)
+    )
+
+    if not orders.exists():
+        logger.info("No orders need to create missing ticket again")
+        return
+
+    data = [
+        TicketCreateDTO(
+            tracking_id=order.tracking_id,
+            type=TicketTypeChoices.MISSING,
+            sub_type=None,
+            investigating_hub_id=order.investigating_hub_id,
+            investigating_group='FLT-LM',
+            ticket_notes=order.last_instruction,
+            assignee_email=None
+        ) for order in orders
+    ]
+
+    # Init ticket service
+    ticket_service = TicketService(logger=logger)
+
+    stt_code, result = ticket_service.create_tickets(data)
+
+    if stt_code != 200:
+        logger.error("Failed to create missing ticket again")
+        return
+
+    success = result.get('success', [])
+    failed = result.get('failed', [])
+
+    logger.info(f"Successfully create missing tickets again: success={success}, failed={failed}")
