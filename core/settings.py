@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'driver.apps.DriverConfig',
     'fail_pickup.apps.FailPickupConfig',
     'pre_success.apps.PreSuccessConfig',
+    'add_tag.apps.AddTagConfig',
 ]
 
 MIDDLEWARE = [
@@ -275,6 +276,14 @@ LOGGING = {
             'tags': {"tool": "fail_pickup"},
             'version': "1",
         },
+        'prior_b2b': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "prior_b2b"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -304,7 +313,11 @@ LOGGING = {
         'fail_pickup': {
             'handlers': ['console', 'fail_pickup'],
             'propagate': False,
-        }
+        },
+        'add_tag.handler.b2b_prior': {
+            'handlers': ['console', 'prior_b2b'],
+            'propagate': False,
+        },
     },
 }
 # endregion Logging
