@@ -6,7 +6,7 @@ from django.utils import timezone
 
 from stos.utils import chunk_list
 from ..base import BaseService
-from ..base.order import BaseOrder
+from ..base.order import BaseOrder, TagChoices
 from ..dto import OrderDTO
 
 
@@ -156,3 +156,72 @@ class OrderService(BaseService):
             "type": "DELIVERY"
         }
         return self.make_request(url, method='DELETE', payload=payload)
+
+    def add_tags(self, order_ids: List[int], tags: List[TagChoices]) -> Tuple[int, dict]:
+        """
+        Add tags to orders.
+
+        Args:
+            order_ids (List[int]): List of order IDs.
+            tags (List[TagChoices]): List of tags to add.
+
+        Returns:
+            Tuple[int, dict]: A tuple containing status code and response data.
+        """
+
+        if not order_ids or not tags:
+            return 200, {'success': [], 'failed': []}
+
+        url = f'{self._base_url}/core/orders/tags/append-bulk'
+        payload = [
+            {
+                "order_id": order_id,
+                "tags": [tag.value for tag in tags]
+            } for order_id in order_ids
+        ]
+        success, failed = [], []
+        for chunk in chunk_list(payload, 100):
+            stt_code, result = self.make_request(url, method='POST', payload=chunk)
+
+            if stt_code != 200:
+                self._logger.error(f"Failed to add tags: {result}")
+                failed.extend([order['order_id'] for order in chunk])
+                continue
+
+            success.extend(result['data'].get('successful_order_ids', []))
+            failed.extend(result['data'].get("failed_orders", []))
+
+        return 200, {'success': success, 'failed': failed}
+
+    def remove_tags(self, order_ids: List[int], tags: List[TagChoices]) -> Tuple[int, dict]:
+        """
+        Remove tags from orders.
+
+        Args:
+            order_ids (List[int]): List of order IDs.
+            tags (List[TagChoices]): List of tags to remove.
+
+        Returns:
+            Tuple[int, dict]: A tuple containing status code and response data.
+        """
+
+        if not order_ids or not tags:
+            return 200, {'success': [], 'failed': []}
+
+        success, failed = [], []
+        for order_id in order_ids:
+            url = f'{self._base_url}/core/orders/{order_id}/tags'
+            payload = {
+                "order_id": order_id,
+                "tags": [tag.value for tag in tags]
+            }
+
+            status_code, result = self.make_request(url, method='DELETE', payload=payload)
+
+            if status_code != 200:
+                self._logger.error(f"Failed to remove tags order {order_id}: {result}")
+                failed.append(order_id)
+
+            success.append(order_id)
+
+        return 200, {'success': success, 'failed': failed}
