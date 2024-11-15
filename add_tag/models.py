@@ -20,4 +20,3 @@ class PriorB2B(BaseModel):
     class Meta:
         verbose_name = 'Prior Tag B2B'
         verbose_name_plural = 'Prior Tag B2B'
-
