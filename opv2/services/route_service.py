@@ -34,7 +34,7 @@ class RouteService(BaseService):
             Tuple[int, int]: A tuple containing status code and response data
             success: 201
         """
-        delivery_date = timezone.now() if not delivery_date
+        delivery_date = delivery_date if delivery_date else timezone.now()
         delivery_date_str = delivery_date.strftime("%Y-%m-%d")
         delivery_datetime = delivery_date - timezone.timedelta(hours=7)
         delivery_datetime_str = delivery_datetime.strftime("%Y-%m-%dT00:00:00Z")
