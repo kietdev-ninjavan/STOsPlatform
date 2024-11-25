@@ -17,7 +17,7 @@ def gemini_detect(data: List[dict]):
     """
     This function is used to detect the address by Gemini
     """
-    gemini = GenminiAIService(configs.get('AI_API_KEY_CHANGE_ADDRESS'))
+    gemini = GenminiAIService(configs.get('AI_API_KEY_CHANGE_ADDRESS'), logger=logger)
 
     history = [
         {
