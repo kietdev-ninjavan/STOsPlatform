@@ -227,7 +227,7 @@ class BaseService(ABC):
         self._set_session_headers()
 
         try:
-            self._logger.debug(f"Payload: {payload}")
+            self._logger.info(f"Payload: {payload}")
             response = self.session.request(method, url, json=payload, files=files)
             self._logger.info(f"{response.url} {response.request.method} {response.status_code}")
             response.raise_for_status()

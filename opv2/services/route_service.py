@@ -34,12 +34,14 @@ class RouteService(BaseService):
             Tuple[int, int]: A tuple containing status code and response data
             success: 201
         """
-        delivery_date_str = delivery_date.strftime("%Y-%m-%dT00:00:00Z") if delivery_date else timezone.now().strftime("%Y-%m-%dT00:00:00Z")
-
+        delivery_date = delivery_date if delivery_date else timezone.now()
+        delivery_date_str = delivery_date.strftime("%Y-%m-%d")
+        delivery_datetime = delivery_date - timezone.timedelta(hours=7)
+        delivery_datetime_str = delivery_datetime.strftime("%Y-%m-%dT00:00:00Z")
         url = f'{self._base_url}/route-v2/routes'
         payload = {
             "date": delivery_date_str,
-            "datetime": delivery_date_str,
+            "datetime": delivery_datetime_str,
             "driver_id": driver_id,
             "hub_id": hub_id,
             "zone_id": zone_id
