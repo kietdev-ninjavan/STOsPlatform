@@ -284,6 +284,14 @@ LOGGING = {
             'tags': {"tool": "prior_b2b"},
             'version': "1",
         },
+        'auto_cancel_missing': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "auto_cancel_missing"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -316,6 +324,10 @@ LOGGING = {
         },
         'add_tag.handler.b2b_prior': {
             'handlers': ['console', 'prior_b2b'],
+            'propagate': False,
+        },
+        'add_tag.handler.auto_cancel_missing': {
+            'handlers': ['console', 'auto_cancel_missing'],
             'propagate': False,
         },
     },

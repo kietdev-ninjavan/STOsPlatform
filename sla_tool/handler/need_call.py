@@ -51,6 +51,44 @@ def __get_breach_sla_tiktok():
     return tracking_ids_and_status
 
 
+def __get_zns_shopee():
+    today = timezone.now().date()
+    qs = ShopeeBacklog.objects.filter(
+        Q(zns_date=today)
+        & Q(rts=False)
+        & ~Q(granular_status__in=[
+            GranularStatusChoices.cancelled,
+            GranularStatusChoices.completed,
+            GranularStatusChoices.pending_pickup,
+            GranularStatusChoices.pending_pickup_at_dp])
+        & Q(return_sn__isnull=True)
+    )
+
+    # Extract tracking_id and granular_status as tuples
+    tracking_ids = list(qs.values_list('tracking_id'))
+
+    return tracking_ids
+
+
+def __get_zns_tiktok():
+    today = timezone.now().date()
+    qs = TiktokBacklog.objects.filter(
+        Q(extended_date=today + timezone.timedelta(days=1)) &
+        Q(rts=False) &
+        ~Q(granular_status__in=[
+            GranularStatusChoices.cancelled,
+            GranularStatusChoices.completed,
+            GranularStatusChoices.pending_pickup,
+            GranularStatusChoices.pending_pickup_at_dp
+        ])
+    )
+
+    # Extract tracking_id and granular_status as tuples
+    tracking_ids = list(qs.values_list('tracking_id'))
+
+    return tracking_ids
+
+
 def __check_called(tracking_ids_and_status):
     tracking_ids = [t_id for t_id, _ in tracking_ids_and_status]
     all_records = RecordSLACall.objects.filter(tracking_id__in=tracking_ids)
@@ -147,6 +185,26 @@ def out_to_stos_sheet():
     gsheet.add_dataframe(df, 1200843790, append=True)
 
 
+def get_zns():
+    # Shopee
+    sp_tracking_ids = __get_zns_shopee()
+
+    shopee_df = pd.DataFrame(sp_tracking_ids, columns=['TID'])
+    shopee_df['day_input'] = timezone.now().date()
+    shopee_df['Shipper'] = 'Shopee'
+
+    # TikTok
+    tt_tracking_ids = __get_zns_tiktok()
+
+    tiktok_df = pd.DataFrame(tt_tracking_ids, columns=['TID'])
+    tiktok_df['day_input'] = timezone.now().date()
+    tiktok_df['Shipper'] = 'Tiktok'
+
+    final_df = pd.concat([shopee_df, tiktok_df], ignore_index=True)
+
+    return final_df
+
+
 def out_to_bi_sheet():
     service_account = get_service_account(configs.get('GSA_BI'))
     gsheet = GoogleSheetService(
@@ -156,3 +214,14 @@ def out_to_bi_sheet():
     )
     df = get_sla_need_call()
     gsheet.add_dataframe(df, 132245029, append=True)
+
+
+def out_zns_to_bi():
+    service_account = get_service_account(configs.get('GSA_BI'))
+    gsheet = GoogleSheetService(
+        service_account,
+        '1h7KeEnCznjt-ms-uO-9KQUfpqXZ7ZnfANdx4bdh6-tU',
+        logger=logger
+    )
+    df = get_zns()
+    gsheet.add_dataframe(df, 1289596346, append=True)

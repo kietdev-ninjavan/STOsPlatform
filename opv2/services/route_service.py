@@ -1,5 +1,7 @@
 import logging
+import re
 from datetime import datetime
+from typing import List
 
 from django.utils import timezone
 
@@ -18,6 +20,15 @@ class RouteService(BaseService):
         super().__init__(logger)
         self._logger = logger
         self._base_url = 'https://walrus.ninjavan.co/vn'
+
+    @staticmethod
+    def __get_tracking_id_from_text(text: str) -> str | None:
+        match = re.search(r"Order (\w+)", text)
+        if match:
+            tracking_id = match.group(1)
+            return tracking_id
+
+        return None
 
     def create_route(self, driver_id: int = None, delivery_date: datetime = None, hub_id: int = 1,
                      zone_id: int = 2) -> tuple:
@@ -146,3 +157,7 @@ class RouteService(BaseService):
             "type": "DELIVERY"
         }
         return self.make_request(url, payload=payload, method='PUT')
+
+    def create_route_with_orders(self, tracking_ids: List[str], driver_id: int = None, delivery_date: datetime = None, hub_id: int = 1,
+                                 zone_id: int = 2) -> tuple:
+        pass

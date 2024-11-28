@@ -19,11 +19,12 @@ class SoftDeleteFilter(SimpleListFilter):
         )
 
     def queryset(self, request, queryset):
-        if self.value() == 'deleted':
+        value = self.value()
+        if value == 'deleted':
             return queryset.filter(delete_at__isnull=False)
-        elif self.value() == 'active':
+        elif value == 'active':
             return queryset.filter(delete_at__isnull=True)
-        return queryset
+        return queryset.none() if value else queryset
 
 
 class BaseAdmin(SimpleHistoryAdmin):
@@ -38,9 +39,12 @@ class BaseAdmin(SimpleHistoryAdmin):
 
     def get_queryset(self, request):
         """
-        Override the default queryset to show active or all objects based on filter selection.
+        Override the default queryset to show all objects including soft-deleted ones.
         """
-        return self.model.all_objects.all()  # Show both active and deleted
+        try:
+            return self.model.all_objects.all()  # Require a custom manager for soft delete
+        except AttributeError:
+            return super().get_queryset(request)  # Fallback to default queryset
 
     def is_deleted(self, obj):
         """

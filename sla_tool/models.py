@@ -80,6 +80,7 @@ class ShopeeBacklog(BaseOrder):
     shipper_date = models.DateField(null=True, blank=True)
     extend_days = models.IntegerField(null=True, blank=True)
     extended_date = models.DateField(null=True, blank=True)
+    zns_date = models.DateField(null=True, blank=True)
 
     class Meta:
         verbose_name = 'Shopee Backlog'

@@ -69,3 +69,19 @@ class DetectChangeAddress(BaseModel):
     class Meta:
         verbose_name = 'Detect Change Address'
         verbose_name_plural = 'Detect Change Addresses'
+
+
+class TicketMissing(BaseTicket):
+    order_id = models.BigIntegerField(null=True, blank=True)
+    created_at = models.DateTimeField(null=True, blank=True)
+    shipper_id = models.BigIntegerField(null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
+    ws_last_scan = models.DateTimeField(null=True, blank=True)
+    ib_last_scan = models.DateTimeField(null=True, blank=True)
+    sm_last_scan = models.DateTimeField(null=True, blank=True)
+    need_resolve = models.BooleanField(default=False)
+    resolve_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Ticket Missing'
+        verbose_name_plural = 'Tickets Missing'

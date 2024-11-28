@@ -77,13 +77,13 @@ def collect_tiktok_backlogs():
     logger.info(f"Successfully add new {success_count}/{total_records} records.")
 
 
-def update_tiktok_order_info_form_opv2():
+def update_tiktok_order_info_form_opv2(date: timezone.datetime):
     # Initialize Order Service
     order_service = OrderService(logger=logger)
 
     # Get all tracking IDs from the database
     qs_orders = TiktokBacklog.objects.filter(
-        Q(extended_date=timezone.now().date())
+        Q(extended_date=date)
     )
 
     if not qs_orders.exists():
