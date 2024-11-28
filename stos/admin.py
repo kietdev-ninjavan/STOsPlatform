@@ -7,6 +7,7 @@ from django_celery_beat.admin import (
 from django_celery_beat.models import (
     IntervalSchedule, CrontabSchedule, SolarSchedule, ClockedSchedule
 )
+from django_celery_beat.models import PeriodicTask
 
 from core.base.admin import BaseAdmin
 from .models import ExtendedPeriodicTask, User, Holiday, Config
@@ -138,6 +139,7 @@ stos_platform_admin.register(IntervalSchedule, IntervalScheduleAdmin)
 stos_platform_admin.register(CrontabSchedule, CrontabScheduleAdmin)
 stos_platform_admin.register(SolarSchedule, SolarScheduleAdmin)
 stos_platform_admin.register(ClockedSchedule, ClockedScheduleAdmin)
+stos_platform_admin.register(PeriodicTask, PeriodicTaskAdmin)
 
 
 # endregion

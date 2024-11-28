@@ -3,6 +3,8 @@ import time
 from celery import shared_task
 
 from core.base.task import STOsQueueOnce
+from .handler.auto_cancel_missing.collect_data import collect_ticket_missing
+from .handler.auto_cancel_missing.resolve import resolve_missing, check_need_resolve
 from .handler.change_address.approve import (
     approve_hcm_dn_hn,
     approve_map_2_level
@@ -77,3 +79,10 @@ def handle_change_date_task():
 @shared_task(name='[Reco Ticket] Handle Ticket Change Date Apply Action', base=STOsQueueOnce, once={'graceful': True})
 def handle_change_date_apply_action_task():
     apply_action()
+
+
+@shared_task(name='[Reco Ticket] Handle Auto Cancel Missing', base=STOsQueueOnce, once={'graceful': True})
+def handle_auto_cancel_missing_task():
+    collect_ticket_missing()
+    check_need_resolve()
+    resolve_missing()

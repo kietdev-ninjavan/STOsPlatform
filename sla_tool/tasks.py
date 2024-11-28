@@ -1,4 +1,5 @@
 from celery import shared_task
+from django.utils import timezone
 
 from core.base.task import STOsQueueOnce
 from .handler.calculate_sla import (
@@ -10,13 +11,13 @@ from .handler.final import (
     out_breach_data
 )
 from .handler.need_call import (
-    out_to_stos_sheet,
-    out_to_bi_sheet,
+    out_to_bi_sheet
 )
 from .handler.shopee import (
     collect_shopee_backlogs,
     update_shopee_order_info_form_opv2,
-    create_shipper_date
+    create_shipper_date,
+    create_zns_date
 )
 from .handler.sla_call import (
     collect_breach_sla_call,
@@ -42,20 +43,26 @@ def collect_shopee_extend_sla_task():
     calculate_sla_date_tiktok()
 
 
-@shared_task(name='[SLA Tool] Handle Find Missing Call', base=STOsQueueOnce, once={'graceful': True})
-def find_missing_call_task():
+@shared_task(name='[SLA Tool] Handle Find ZNS', base=STOsQueueOnce, once={'graceful': True})
+def find_zns():
     # Shopee
     collect_shopee_backlogs()
     create_shipper_date()
+    create_zns_date()
     update_shopee_order_info_form_opv2()
 
     # Tiktok
-    collect_tiktok_backlogs()
-    update_tiktok_order_info_form_opv2()
+    update_tiktok_order_info_form_opv2(timezone.now().date() + timezone.timedelta(days=1))
 
-    # Output
-    out_to_stos_sheet()
+    # Out to BI Sheet
     out_to_bi_sheet()
+
+
+@shared_task(name='[SLA Tool] Handle Find Missing Call', base=STOsQueueOnce, once={'graceful': True})
+def find_missing_call_task():
+    # Tiktok
+    collect_tiktok_backlogs()
+    update_tiktok_order_info_form_opv2(timezone.now().date())
 
 
 @shared_task(name='[SLA Tool] Import Final Sheet', base=STOsQueueOnce, once={'graceful': True})

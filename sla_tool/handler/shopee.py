@@ -194,6 +194,20 @@ def create_shipper_date():
     logger.info(f'Successfully updated {shopee_backlogs.count()} Shopee Backlog records with shipper date.')
 
 
+def create_zns_date():
+    """
+    Create ZNS date for Shopee Backlog records.
+    """
+    # Get all Shopee Backlog records without ZNS date
+    shopee_backlogs = ShopeeBacklog.objects.filter(
+        Q(zns_date__isnull=True) &
+        Q(aging_from_lost_threshold=1)
+    )
+
+    shopee_backlogs.update(zns_date=timezone.now().date())
+    logger.info(f'Successfully updated {shopee_backlogs.count()} Shopee Backlog records with ZNS date.')
+
+
 def update_shopee_order_info_form_opv2():
     # Initialize Order Service
     order_service = OrderService(logger=logger)
