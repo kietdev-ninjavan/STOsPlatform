@@ -47,7 +47,7 @@ def collect_extend_sla(file_name: str = None):
             new_records.append(ExtendSLATracking(
                 tracking_id=row['tracking_id'],
                 extend_days=row['shopee_extension_days'],
-                sla_date=row['shopee_sla_date'],
+                sla_date=parse_datetime(row['shopee_sla_date']),
                 breach_sla_date=parse_datetime(row['shopee_breach_sla_date']),
                 first_sla_expectation=parse_datetime(row['shopee_1st_sla_expectation']),
                 breach_sla_expectation=parse_datetime(row['shopee_breach_sla_expectation']),
