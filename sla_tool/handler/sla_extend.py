@@ -11,7 +11,7 @@ from ..models import ExtendSLATracking
 logger = logging.getLogger(__name__)
 
 
-def collect_extend_sla():
+def collect_extend_sla(file_name: str = None):
     """
     Collects and stores the extend SLA tracking IDs.
     """
@@ -22,7 +22,8 @@ def collect_extend_sla():
 
     # Find file csv
     two_days_ago = timezone.now() - timezone.timedelta(days=2)
-    file_name = f'{two_days_ago.strftime("%Y-%m-%d")}-master'
+    if not file_name:
+        file_name = f'{two_days_ago.strftime("%Y-%m-%d")}-master'
     files = gdrive_service.get_file_by_name(file_name)
 
     if not files:
@@ -46,7 +47,7 @@ def collect_extend_sla():
         try:
             new_records.append(ExtendSLATracking(
                 tracking_id=row['tracking_id'],
-                extend_days=row['extension_days'],
+                extend_days=row['shopee_extension_days'],
                 sla_date=row['shopee_sla_date'],
                 breach_sla_date=row['shopee_breach_sla_date'],
                 first_sla_expectation=row['shopee_1st_sla_expectation'],

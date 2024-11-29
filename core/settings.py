@@ -326,7 +326,7 @@ LOGGING = {
             'handlers': ['console', 'prior_b2b'],
             'propagate': False,
         },
-        'add_tag.handler.auto_cancel_missing': {
+        'reco_ticket.handler.auto_cancel_missing': {
             'handlers': ['console', 'auto_cancel_missing'],
             'propagate': False,
         },
