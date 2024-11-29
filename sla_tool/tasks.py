@@ -11,7 +11,7 @@ from .handler.final import (
     out_breach_data
 )
 from .handler.need_call import (
-    out_to_bi_sheet
+    out_zns_to_bi
 )
 from .handler.shopee import (
     collect_shopee_backlogs,
@@ -55,7 +55,7 @@ def find_zns():
     update_tiktok_order_info_form_opv2(timezone.now().date() + timezone.timedelta(days=1))
 
     # Out to BI Sheet
-    out_to_bi_sheet()
+    out_zns_to_bi()
 
 
 @shared_task(name='[SLA Tool] Handle Find Missing Call', base=STOsQueueOnce, once={'graceful': True})
