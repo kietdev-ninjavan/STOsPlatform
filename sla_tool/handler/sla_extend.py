@@ -5,7 +5,7 @@ from simple_history.utils import bulk_create_with_history
 
 from google_wrapper.services import GoogleDriveService
 from google_wrapper.utils import get_service_account
-from stos.utils import configs, chunk_list
+from stos.utils import configs, chunk_list, parse_datetime
 from ..models import ExtendSLATracking
 
 logger = logging.getLogger(__name__)
@@ -42,16 +42,15 @@ def collect_extend_sla(file_name: str = None):
     for index, row in file_content.iterrows():
         # Skip existing tracking IDs
         if row['tracking_id'] in existing_tracking_ids:
-            logger.info(f'Skipping existing tracking ID: {row["tracking_id"]}')
             continue
         try:
             new_records.append(ExtendSLATracking(
                 tracking_id=row['tracking_id'],
                 extend_days=row['shopee_extension_days'],
                 sla_date=row['shopee_sla_date'],
-                breach_sla_date=row['shopee_breach_sla_date'],
-                first_sla_expectation=row['shopee_1st_sla_expectation'],
-                breach_sla_expectation=row['shopee_breach_sla_expectation'],
+                breach_sla_date=parse_datetime(row['shopee_breach_sla_date']),
+                first_sla_expectation=parse_datetime(row['shopee_1st_sla_expectation']),
+                breach_sla_expectation=parse_datetime(row['shopee_breach_sla_expectation']),
             ))
         except Exception as e:
             logger.error(f'Error processing row {index}: {e}')
