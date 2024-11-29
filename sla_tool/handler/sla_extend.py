@@ -41,7 +41,8 @@ def collect_extend_sla(file_name: str = None):
     new_records = []
     for index, row in file_content.iterrows():
         # Skip existing tracking IDs
-        if row['tracking_id'] in existing_tracking_ids:
+        tracking_id = row['tracking_id']
+        if tracking_id in existing_tracking_ids:
             continue
         try:
             new_records.append(ExtendSLATracking(
@@ -53,7 +54,7 @@ def collect_extend_sla(file_name: str = None):
                 breach_sla_expectation=parse_datetime(row['shopee_breach_sla_expectation']),
             ))
         except Exception as e:
-            logger.error(f'Error processing row {index}: {e}')
+            logger.error(f'Error processing row {index}|{tracking_id}: {e}')
             continue
 
     # Bulk create new records
