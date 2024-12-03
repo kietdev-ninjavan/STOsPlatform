@@ -24,7 +24,7 @@ class TicketResolveDTO:
 @dataclass
 class TicketDTO:
     created_at: datetime
-    hub_id: int
+    hub_id: Optional[int]
     id: int
     investigating_hub_id: int
     source_of_entry: str
@@ -38,7 +38,7 @@ class TicketDTO:
         """Create an OrderDTO from a dictionary"""
         return cls(
             id=data.get('id'),
-            hub_id=int(data.get('hubId')),
+            hub_id=int(data.get('hubId')) if data.get('hubId') != '' else None,
             created_at=parse_datetime(data.get('createdAt')),
             investigating_hub_id=data.get('investigatingHubId'),
             source_of_entry=data.get('sourceOfEntry'),
