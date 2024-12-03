@@ -232,7 +232,7 @@ def swap_day_month_if_different(date: datetime) -> datetime:
     """
     current_month = datetime.now().month
     # Swap only if the input month is different from the current month
-    if date.month != current_month:
+    if date.month < current_month:
         try:
             # Attempt to swap day and month
             return date.replace(day=date.month, month=date.day)
