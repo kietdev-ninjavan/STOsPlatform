@@ -24,9 +24,9 @@ class TicketResolveDTO:
 @dataclass
 class TicketDTO:
     created_at: datetime
-    hub_id: int
+    hub_id: Optional[int]
     id: int
-    investigating_hub_id: int
+    investigating_hub_id: Optional[int]
     source_of_entry: str
     status: TicketStatusChoices
     type: TicketTypeChoices
