@@ -1,5 +1,6 @@
+import json
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any, List
 
 
 @dataclass
@@ -37,3 +38,18 @@ class OrderDTO:
 
     def __repr__(self):
         return self.tracking_id
+
+
+@dataclass
+class AllOrderSearchFilterDTO:
+    field: str
+    values: List[Any]
+
+    def to_dict(self) -> dict:
+        return {
+            'field': self.field,
+            'values': self.values
+        }
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())

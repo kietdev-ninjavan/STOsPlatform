@@ -211,7 +211,7 @@ class BaseService(ABC):
             return response.status_code, response.text
 
     @TokenManager.auto_update_token
-    def make_request(self, url: str, method: str = 'GET', payload: Any = None, files: dict = None) -> tuple:
+    def make_request(self, url: str, method: str = 'GET', payload: Any = None, data: Any = None, params: dict = None, files: dict = None) -> tuple:
         """
         Make an API request with retry logic for token expiration.
 
@@ -219,6 +219,8 @@ class BaseService(ABC):
             url (str): The API URL.
             method (str): HTTP method ('GET', 'POST', etc.). Defaults to 'GET'.
             payload (dict, optional): JSON payload for the request.
+            data (dict, optional): Form data for the request.
+            params (dict, optional): URL parameters for the request.
             files (dict, optional): Files to upload with the request.
 
         Returns:
@@ -228,7 +230,7 @@ class BaseService(ABC):
 
         try:
             self._logger.info(f"Payload: {payload}")
-            response = self.session.request(method, url, json=payload, files=files)
+            response = self.session.request(method, url, json=payload, files=files, data=data, params=params)
             self._logger.info(f"{response.url} {response.request.method} {response.status_code}")
             response.raise_for_status()
             return self._process_response(response)
