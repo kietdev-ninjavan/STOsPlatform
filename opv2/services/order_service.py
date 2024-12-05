@@ -7,7 +7,7 @@ from django.utils import timezone
 from stos.utils import chunk_list
 from ..base import BaseService
 from ..base.order import BaseOrder, TagChoices
-from ..dto import OrderDTO
+from ..dto import OrderDTO, AllOrderSearchFilterDTO
 
 
 class OrderService(BaseService):
@@ -27,10 +27,14 @@ class OrderService(BaseService):
     def __convert_search_data_to_order_dto(search_data: List[dict]) -> Dict[str, OrderDTO]:
         orders = {}
         for item in search_data:
-            order_data = item.get("order")
-            if order_data:
-                order_dto = OrderDTO.from_dict(order_data)
-                orders[order_dto.tracking_id] = order_dto
+            try:
+                order_data = item.get("order")
+                if order_data:
+                    order_dto = OrderDTO.from_dict(order_data)
+                    orders[order_dto.tracking_id] = order_dto
+            except Exception as e:
+                logging.error(f"Failed to convert search data to OrderDTO: {e}")
+
         return orders
 
     def create_batch(self) -> tuple:
@@ -43,47 +47,77 @@ class OrderService(BaseService):
         url = f"{self._base_url}/order-create/internal/4.1/batch"
         return self.make_request(url, method='POST')
 
-    def search_all(self, data: List[Union[str, int]], filter_by_shipper: bool = False, start_date: datetime = None,
-                   end_date: datetime = None) -> Tuple[int, Dict[str, OrderDTO]]:
+    def search_all(self, data: List[Union[str, int]], filter_by_shipper: bool = False,
+                   search_filters: List[AllOrderSearchFilterDTO] = None,
+                   start_date: datetime = None, end_date: datetime = None) -> Tuple[int, Dict[str, OrderDTO]]:
         """
         Searches for orders based on the provided data.
 
         Args:
             data (List[Union[str, int]]): List of tracking IDs or global shipper IDs.
             filter_by_shipper (bool, optional): Whether to filter by shipper. Defaults to False.
+            search_filters (List[AllOrderSearchFilterDTO], optional): List of search filters. Defaults to None.
             start_date (datetime, optional): The start date for the search range. Defaults to None.
             end_date (datetime, optional): The end date for the search range. Defaults to None.
 
         Returns:
             Tuple[int, dict]: A tuple containing the status code and the search result.
         """
+        # Split the data into chunks of 1000 items
         chunks = chunk_list(data, 1000)
         search_data = {}
+        # Precompute search filters if they exist to avoid adding them repeatedly
+        filter_dicts = [search_filter.to_dict() for search_filter in search_filters] if search_filters else []
 
+        # Construct the search range if both dates are provided
+        search_range = None
+        if start_date and end_date:
+            search_range = {
+                "field": "created_at",
+                "start_time": start_date.strftime('%Y-%m-%dT00:00:00Z'),
+                "end_time": end_date.strftime('%Y-%m-%dT%H:%M:%SZ')
+            }
+
+        # Iterate over chunks and make requests
         for chunk in chunks:
-            url = f'{self._base_url}/order-search/search?size={len(chunk)}'
+            # Construct the URL for each chunk
+            url = f'{self._base_url}/order-search/search'
+            total = 1000
+            # Construct the payload with the search filters and range
             payload = {
                 "search_filters": [
                     {
                         "field": "global_shipper_id" if filter_by_shipper else "tracking_id",
                         "values": chunk
                     },
+                    *filter_dicts  # Include additional filters if provided
                 ],
-                "search_range": (
-                    {
-                        "field": "created_at",
-                        "start_time": start_date.strftime('%Y-%m-%dT00:00:00Z'),
-                        "end_time": end_date.strftime('%Y-%m-%dT%H:%M:%SZ')
-                    } if start_date and end_date else None
-                ),
+                "search_range": search_range,
                 "search_field": None
             }
 
-            status_code, result = self.make_request(url, method='POST', payload=payload)
-            if status_code == 200 and "search_data" in result:
-                orders = self.__convert_search_data_to_order_dto(result["search_data"])
-                search_data.update(orders)
+            params = {
+                "size": 1000,
+                'search_after': None
+            }
 
+            while total > 0:
+                # Make the request to the API
+                status_code, result = self.make_request(url, method='POST', payload=payload, params=params)
+                print(status_code)
+                if status_code != 200:
+                    self._logger.error(f"Failed to search for orders: {result}")
+                    continue
+                # Check the response status and process the result if successful
+                if status_code == 200 and "search_data" in result:
+                    orders = self.__convert_search_data_to_order_dto(result["search_data"])
+                    search_data.update(orders)
+
+                if result['total'] > total:
+                    params['search_after'] = result['search_data'][-1].get('order').get('id')
+                    total = result['total'] - len(search_data)
+
+        # Return the appropriate response based on whether any data was found
         if not search_data:
             return 404, {}
 

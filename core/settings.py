@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'fail_pickup.apps.FailPickupConfig',
     'pre_success.apps.PreSuccessConfig',
     'add_tag.apps.AddTagConfig',
+    'shein.apps.SheinConfig',
 ]
 
 MIDDLEWARE = [
@@ -292,6 +293,14 @@ LOGGING = {
             'tags': {"tool": "auto_cancel_missing"},
             'version': "1",
         },
+        'shein': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "shein"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -328,6 +337,10 @@ LOGGING = {
         },
         'reco_ticket.handler.auto_cancel_missing': {
             'handlers': ['console', 'auto_cancel_missing'],
+            'propagate': False,
+        },
+        'shein': {
+            'handlers': ['console', 'shein'],
             'propagate': False,
         },
     },

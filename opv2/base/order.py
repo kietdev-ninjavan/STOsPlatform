@@ -62,6 +62,7 @@ class TagChoices(models.IntegerChoices):
     RTS_VCB_18 = 168, 'RTS-VCB-18'
     RTS_VCB_19 = 169, 'RTS-VCB-19'
     RTS_VCB_20 = 170, 'RTS-VCB-20'
+    RTS_SHEIN = 171, 'RTS - SHEIN'
 
 
 # Base Order Model
