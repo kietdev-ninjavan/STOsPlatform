@@ -83,7 +83,8 @@ def change_address():
 
         try:
             with transaction.atomic():
-                order.update(changed_address_at=timezone.now())
+                order.changed_address_at = timezone.now()
+                order.save()
             logger.info("Successfully change address ticket.")
         except Exception as e:
             logger.error(f"Failed to update orders: {e}")
