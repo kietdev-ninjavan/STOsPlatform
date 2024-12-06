@@ -118,7 +118,6 @@ class OrderService(BaseService):
 
                 total = result['total'] - len(search_data)
 
-
         # Return the appropriate response based on whether any data was found
         if not search_data:
             return 404, {}
