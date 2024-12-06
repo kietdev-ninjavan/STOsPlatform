@@ -115,9 +115,9 @@ class OrderService(BaseService):
 
                 if result['total'] > total:
                     params['search_after'] = result['search_data'][-1].get('order').get('id')
-                    total = result['total'] - len(search_data)
-                else:
-                    break
+
+                total = result['total'] - len(search_data)
+
 
         # Return the appropriate response based on whether any data was found
         if not search_data:
