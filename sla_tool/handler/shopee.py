@@ -201,7 +201,7 @@ def create_zns_date():
     # Get all Shopee Backlog records without ZNS date
     shopee_backlogs = ShopeeBacklog.objects.filter(
         Q(zns_date__isnull=True) &
-        Q(aging_from_lost_threshold=1)
+        Q(aging_from_lost_threshold=-1)
     )
 
     shopee_backlogs.update(zns_date=timezone.now().date())
