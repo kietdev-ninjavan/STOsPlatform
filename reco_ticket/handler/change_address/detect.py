@@ -8,7 +8,7 @@ from simple_history.utils import bulk_create_with_history
 from google_wrapper.services import GenminiAIService
 from stos.utils import configs, chunk_list
 from ...models import TicketChangeAddress, DetectChangeAddress
-
+import re
 logger = logging.getLogger(__name__)
 
 
@@ -59,10 +59,11 @@ def detect_address():
     data = []
     for ticket in tickets:
         content = " ".join(filter(None, [ticket.notes, ticket.comments, ticket.exception_reason]))
+        cleared_link = re.sub(r'https?://\S+', '', content).strip()
 
         data.append({
             "ticket_id": ticket.ticket_id,
-            "text": f"{content}".replace('"', "'"),
+            "text": f"{cleared_link}".replace('"', "'"),
         })
 
     detected_data = []
