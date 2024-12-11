@@ -15,7 +15,7 @@ from .handler.change_address.collect_data import (
 )
 from .handler.change_address.detect import detect_address
 from .handler.change_address.manual import (
-    manual_ticket_have_alo_link
+    skip_ticket_manual_resolve
 )
 from .handler.change_address.output import out_to_gsheet_change_address
 from .handler.change_address.resolve import (
@@ -44,8 +44,8 @@ from .handler.change_date.detect import detect_date
 @shared_task(name='[Reco Ticket] Handle Ticket Change Address', base=STOsQueueOnce, once={'graceful': True})
 def handle_change_address_task():
     collect_ticket_change_address()
-    manual_ticket_have_alo_link()
     load_ticket_change_address_order_info()
+    skip_ticket_manual_resolve()
     resolved_rts_and_last_status()
     resolved_ticket_system_create()
     resolved_ticket_storage_max_stored()
