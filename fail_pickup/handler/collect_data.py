@@ -117,9 +117,9 @@ def collect_job_info():
         logger.error(f"Failed to get job info: {response}")
         return
 
-    map_waypoint = {jb['reservation_id']: jb['waypoint_id'] for jb in response['data']}
-    map_status = {jb['reservation_id']: jb['waypoint_status'].lower() for jb in response['data']}
-    map_driver_id = {jb['reservation_id']: jb['driver_id'] for jb in response['data']}
+    map_waypoint = {jb['pickup_appointment_job_id']: jb['waypoint_id'] for jb in response['data']}
+    map_status = {jb['pickup_appointment_job_id']: jb['status'] for jb in response['data']}
+    map_driver_id = {jb['pickup_appointment_job_id']: jb['driver_id'] for jb in response['data']}
 
     update_data = []
     for pickup_job in pickup_jobs:

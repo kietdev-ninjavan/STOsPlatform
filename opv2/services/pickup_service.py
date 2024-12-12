@@ -21,18 +21,21 @@ class PickupService(BaseService):
 
     def get_info(self, pickup_jobs: List[BasePickup]) -> tuple:
         url = f"{self._base_url}/pa-job-search/search"
-        chunks = chunk_list(pickup_jobs, 1000)
+        chunks = chunk_list(pickup_jobs, 500)
         data = []
         for chunk in chunks:
             payload = {
-                "reservation_ids": [pickup.job_id for pickup in chunk],
-                "types": [],
-                "waypoint_status": [],
-                "max_results": 1000
+                "limit": 500,
+                "use_pit_pagination": False,
+                "query": {
+                    "pickup_appointment_job_id": {
+                        "in": [pickup.job_id for pickup in chunk]
+                    }
+                }
             }
             status_code, result = self.make_request(url, method='POST', payload=payload)
-            if status_code == 200:
-                data.extend(result)
+            if status_code == 200 and "data" in result:
+                data.extend(result["data"])
 
         if not data:
             return 404, {"message": "No data found"}
