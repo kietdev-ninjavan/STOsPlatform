@@ -9,5 +9,5 @@ from .handler.collect_data import collect_order_data
 def shein_task():
     collect_order_data()
     create_cs_ticket()
-    change_address()
+    # change_address()
     add_tag()
