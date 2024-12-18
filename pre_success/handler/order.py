@@ -13,14 +13,24 @@ from .route import get_route_available, create_route, add_order_to_route
 logger = logging.getLogger(__name__)
 
 
-def parcel_sweeper_live():
-    # Filter orders that need processing
-    orders = Order.objects.filter(
-        Q(created_date__date=timezone.now().date()) &
-        Q(granular_status__in=[GranularStatusChoices.arrived_sorting, GranularStatusChoices.en_route]) &
-        Q(parcel_sweeper=False) &
-        Q(rts=False)
-    )
+def parcel_sweeper_live(sla_enabled=False):
+    if sla_enabled:
+        # Filter orders that need processing
+        orders = Order.objects.filter(
+            Q(created_date__date=timezone.now().date()) &
+            Q(granular_status__in=[GranularStatusChoices.arrived_sorting, GranularStatusChoices.en_route]) &
+            Q(parcel_sweeper=False) &
+            Q(rts=False)
+        )
+    else:
+        # Filter orders that need processing
+        orders = Order.objects.filter(
+            Q(created_date__date=timezone.now().date()) &
+            Q(granular_status__in=[GranularStatusChoices.arrived_sorting, GranularStatusChoices.en_route]) &
+            Q(parcel_sweeper=False) &
+            Q(rts=False) &
+            ~Q(project_call__icontains='Breach SLA')
+        )
 
     # Check if there are any orders to process
     if not orders.exists():

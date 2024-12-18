@@ -55,7 +55,7 @@ def sla_task():
     cancel_ticket_missing()
     pull_route_ovfd()
     reschedule_order()
-    parcel_sweeper_live()
+    parcel_sweeper_live(sla_enabled=True)
     routing_orders()
     fetch_task.apply_async()
 
