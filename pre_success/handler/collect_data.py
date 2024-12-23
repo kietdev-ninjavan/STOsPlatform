@@ -225,7 +225,7 @@ def collect_vendor_call_proactive():
         logger=logger
     )
 
-    records = gsheet_service.get_all_records(configs.get('PSS_VENDOR_PROACTIVE_SPREADSHEET_ID', cast=int))
+    records = gsheet_service.get_all_records(configs.get('PSS_VENDOR_PROACTIVE_WORKSHEET_ID', cast=int))
 
     if not records:
         logger.info("No data found in the Google Sheet")
