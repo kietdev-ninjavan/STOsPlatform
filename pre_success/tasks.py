@@ -3,14 +3,17 @@ from celery import shared_task
 from core.base.task import STOsQueueOnce
 from .handler.collect_data import (
     collect_vendor_call_data,
+    collect_vendor_call_proactive,
     load_order_info,
-    load_ticket_info_sla
+    load_ticket_info_sla,
+    load_ticket_info_proactive
 )
 from .handler.order import (
     parcel_sweeper_live,
     routing_orders,
     reschedule_order
 )
+from .handler.proactive import cancel_ticket_proactive
 from .handler.route import (
     fetch_route,
 )
@@ -63,3 +66,15 @@ def sla_task():
 @shared_task(name='[Pre Success] Create MS Ticket Again', base=STOsQueueOnce, once={'graceful': True})
 def creat_ms_again_task():
     create_ms_ticket_again()
+
+
+@shared_task(name='[Pre Success] Handle proactive', base=STOsQueueOnce, once={'graceful': True})
+def handle_proactive():
+    collect_vendor_call_proactive()
+    load_order_info()
+    load_ticket_info_proactive()
+    cancel_ticket_proactive()
+    load_order_info()
+    parcel_sweeper_live()
+    routing_orders()
+    fetch_task.apply_async()
