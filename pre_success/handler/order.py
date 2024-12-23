@@ -4,9 +4,12 @@ from django.db.models import Q
 from django.utils import timezone
 from simple_history.utils import bulk_update_with_history
 
+from google_wrapper.services import GoogleSheetService
+from google_wrapper.utils import get_service_account
 from opv2.base.order import GranularStatusChoices
 from opv2.services import ScanService, OrderService
 from pre_success.models import Order, ShipperGroup
+from stos.utils import configs
 from .collect_data import load_order_info
 from .route import get_route_available, create_route, add_order_to_route
 
@@ -15,12 +18,24 @@ logger = logging.getLogger(__name__)
 
 def parcel_sweeper_live(sla_enabled=False):
     if sla_enabled:
+        google_sheet_service = GoogleSheetService(
+            service_account=get_service_account(configs.get('GSA_BI')),
+            spreadsheet_id=configs.get('PSS_VENDOR_SPREADSHEET_ID'),
+            logger=logger
+        )
+
+        records = google_sheet_service.get_column(configs.get('QA_IC_WORKSHEET_ID', cast=int), 1)
+
+        if not records:
+            logger.warning("No data found in the Google Sheet")
+
         # Filter orders that need processing
         orders = Order.objects.filter(
             Q(created_date__date=timezone.now().date()) &
             Q(granular_status__in=[GranularStatusChoices.arrived_sorting, GranularStatusChoices.en_route]) &
             Q(parcel_sweeper=False) &
-            Q(rts=False)
+            Q(rts=False) &
+            ~Q(tracking_id__in=records)
         )
     else:
         # Filter orders that need processing
