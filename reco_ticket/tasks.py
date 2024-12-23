@@ -15,7 +15,8 @@ from .handler.change_address.collect_data import (
 )
 from .handler.change_address.detect import detect_address
 from .handler.change_address.manual import (
-    skip_ticket_manual_resolve
+    skip_ticket_manual_resolve,
+    manual_ticket_have_alo_link
 )
 from .handler.change_address.output import out_to_gsheet_change_address
 from .handler.change_address.resolve import (
@@ -45,6 +46,7 @@ from .handler.change_date.detect import detect_date
 def handle_change_address_task():
     collect_ticket_change_address()
     load_ticket_change_address_order_info()
+    manual_ticket_have_alo_link()
     skip_ticket_manual_resolve()
     resolved_rts_and_last_status()
     resolved_ticket_system_create()
