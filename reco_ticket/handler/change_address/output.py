@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def out_to_gsheet_change_address():
-    queryset = TicketChangeAddress.objects.filter(Q(out_sheet=False) & Q(action__isnull=False)).select_related('detect').values(
+    queryset = TicketChangeAddress.objects.filter(Q(out_sheet=False) & Q(action='Manual Check')).select_related('detect').values(
         'tracking_id',
         'order_id',
         'shipper_id',
@@ -89,7 +89,7 @@ def out_to_gsheet_change_address():
 
     gsheet_svr.add_dataframe(
         df,
-        684111525,
+        configs.get('OUTPUT_CHANGE_ADDRESS_WORKSHEET_ID', cast=int),
         append=True,
     )
 
