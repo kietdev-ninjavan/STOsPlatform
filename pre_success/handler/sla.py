@@ -81,6 +81,7 @@ def create_ms_ticket_again():
         Q(created_date__date=yesterday)
         & Q(ticket_id__isnull=False)
         & Q(route_id__isnull=False)
+        & Q(project_call__icontains='Breach SLA')
     )
 
     if not orders.exists():
