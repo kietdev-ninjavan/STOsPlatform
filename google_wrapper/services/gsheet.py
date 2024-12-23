@@ -337,7 +337,7 @@ class GoogleSheetService:
             self.__handle_api_error(error)
 
     @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
-    def get_column(self, worksheet: Union[int, str, gspread.Worksheet], column: Union[int, str], header:bool = False) -> List[str]:
+    def get_column(self, worksheet: Union[int, str, gspread.Worksheet], column: Union[int, str], header: bool = False) -> List[str]:
         """
         Retrieve a specific column from the worksheet as a list using gspread.
 
