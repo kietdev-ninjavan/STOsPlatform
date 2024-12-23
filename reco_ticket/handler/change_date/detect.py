@@ -33,9 +33,9 @@ def gemini_detect(data: List[dict]):
             ],
         },
     ]
-
+    logger.debug(f"Detecting: {data}")
     detected = gemini.chat_session(history, f'{data}')
-
+    logger.debug(f"Detected: {detected}")
     return detected
 
 

@@ -337,14 +337,14 @@ class GoogleSheetService:
             self.__handle_api_error(error)
 
     @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
-    def get_column(self, worksheet: Union[int, str, gspread.Worksheet], column: Union[int, str]) -> List[str]:
+    def get_column(self, worksheet: Union[int, str, gspread.Worksheet], column: Union[int, str], header:bool = False) -> List[str]:
         """
         Retrieve a specific column from the worksheet as a list using gspread.
 
         Args:
             worksheet (Union[int, str, gspread.Worksheet]): The worksheet to retrieve the column from.
             column (Union[int, str]): The column identifier, either as a string (column name) or integer (column index).
-
+            header (bool): Whether to include the header row. Defaults to False.
         Returns:
             list[str]: A list containing the values of the specified column.
 
@@ -364,6 +364,10 @@ class GoogleSheetService:
                 col_values = worksheet.col_values(column)
             else:
                 raise ValueError("Column must be specified as an integer (index) or string (column name).")
+
+            # Optionally remove header row
+            if not header:
+                col_values = col_values[1:]
 
             # Optionally remove empty values
             col_values_cleaned = [value for value in col_values if value.strip()]
