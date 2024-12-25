@@ -5,6 +5,7 @@ from celery import shared_task
 from core.base.task import STOsQueueOnce
 from .handler.auto_cancel_missing.collect_data import collect_ticket_missing
 from .handler.auto_cancel_missing.resolve import resolve_missing, check_need_resolve
+from .handler.change_address.alo_link import solve_ticket_have_alo_link
 from .handler.change_address.approve import (
     approve_hcm_dn_hn,
     approve_map_2_level
@@ -15,8 +16,7 @@ from .handler.change_address.collect_data import (
 )
 from .handler.change_address.detect import detect_address
 from .handler.change_address.manual import (
-    skip_ticket_manual_resolve,
-    manual_ticket_have_alo_link
+    skip_ticket_manual_resolve
 )
 from .handler.change_address.output import out_to_gsheet_change_address
 from .handler.change_address.resolve import (
@@ -46,8 +46,8 @@ from .handler.change_date.detect import detect_date
 def handle_change_address_task():
     collect_ticket_change_address()
     load_ticket_change_address_order_info()
-    manual_ticket_have_alo_link()
     skip_ticket_manual_resolve()
+    solve_ticket_have_alo_link()
     resolved_rts_and_last_status()
     resolved_ticket_system_create()
     resolved_ticket_storage_max_stored()
