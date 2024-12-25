@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'pre_success.apps.PreSuccessConfig',
     'add_tag.apps.AddTagConfig',
     'shein.apps.SheinConfig',
+    'fail_delivery.apps.FailDeliveryConfig',
+    'wms.apps.WmsConfig'
 ]
 
 MIDDLEWARE = [
