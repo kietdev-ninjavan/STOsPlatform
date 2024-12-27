@@ -1,0 +1,54 @@
+import logging
+from datetime import datetime, timedelta
+from opv2.base.wms import WMSBin
+from opv2.services import WMSService
+from requests.exceptions import HTTPError, RequestException
+
+logger = logging.getLogger(__name__)
+
+def wms_putaway():
+    """
+        Load orders automatically ASN Uploaded on WMS
+        Putaway SHEIN orders
+    """
+    wms = WMSService()
+    to_putaway = []
+    try : 
+        code_asn , response_asn = wms.load_asn_orders(
+            asn_from= datetime.now() - timedelta(days=2),
+            asn_to= datetime.now()
+        )
+        current_asn_uploaded = response_asn.get("parcels")
+        shein_asn_uploaded = [
+            {
+                "tracking_id": order["tracking_id"],
+                "global_shipper_id": order["global_shipper_id"]
+            }
+            for order in current_asn_uploaded
+                if order["global_shipper_id"] == 7512979
+        ]
+        if not shein_asn_uploaded: 
+            logger.info("No SHEIN orders to putaway")
+            return
+        logger.info(f"Found SHEIN {len(shein_asn_uploaded)} orders to putaway")
+        to_putaway.extend(shein_asn_uploaded)
+    except (HTTPError, RequestException) as request_error:
+        logger.error(f"Request error when load ASN orders from WMS Service : {request_error}")
+        raise request_error
+    except Exception as e:
+        logger.error(f"Error when load ASN orders from WMS Service: {e}")
+        raise e
+    
+    
+    code_putaway, response_putaway = wms.putaway_orders(
+        tracking_ids=[order["tracking_id"] for order in to_putaway],
+        bin= WMSBin
+    )
+    if code_putaway != 200:
+        logger.error(f"Error when putaway orders: {response_putaway}")
+        return  
+    
+    logger.info(f"Successfully putaway {len(response_putaway)} orders")
+    
+    
+    
