@@ -113,7 +113,7 @@ def warehouse_holding():
 
     holding_data = load_warehouse_success()
     if not holding_data:
-        logger.info("No SHEIN holding data found in the Google Sheet")
+        logger.info("No SHEIN holding data found in system")
         return
 
     current_orders = OrigOrders.objects.values_list("tracking_id", flat=True)

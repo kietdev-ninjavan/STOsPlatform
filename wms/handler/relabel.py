@@ -104,7 +104,7 @@ def wms_relabel():
     # Close relabel session            
     code_close, response_close = wms.close_session(relabel_session.get("id"))
     if code_close == 200:
-        logger.info(f"Closed session {relabel_session.get("id")}")
+        logger.info(f'Closed session {relabel_session.get("id")}')
     else:
-        logger.error(f"Fail to close session {relabel_session.get("id")}")
+        logger.error(f'Fail to close session {relabel_session.get("id")}')
     

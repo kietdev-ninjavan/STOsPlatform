@@ -110,7 +110,7 @@ def wms_dispose():
     # Close dispose session
     code_close, response_close = wms.close_session(dispose_session.get("id"))
     if code_close == 200:
-        logger.info(f"Closed session {dispose_session.get("id")}")
+        logger.info(f'Closed session {dispose_session.get("id")}')
     else:
-        logger.error(f"Fail to close session {dispose_session.get("id")}")
+        logger.error(f'Fail to close session {dispose_session.get("id")}')
     

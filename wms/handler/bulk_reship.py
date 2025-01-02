@@ -3,6 +3,7 @@ from datetime import datetime
 
 from simple_history.utils import bulk_create_with_history
 
+from stos.utils import configs
 from opv2.base.wms import WMSAction
 from opv2.services import WMSService
 from metabase.client import MetabaseClient
@@ -114,9 +115,9 @@ def wms_bulk_reship():
     # Close session
     code_close, response_close = wms.close_session(reship_session.get("id"))
     if code_close == 200:
-        logger.info(f"Closed session {reship_session.get("id")}")
+        logger.info(f'Closed session {reship_session.get("id")}')
     else:
-        logger.error(f"Fail to close session {reship_session.get("id")}")
+        logger.error(f'Fail to close session {reship_session.get("id")}')
 
 
 def metabase_bulk_reship():
@@ -127,7 +128,6 @@ def metabase_bulk_reship():
         List[dict] : A list of dict response content.
     """
     
-    session_id = "06e6870c-f982-4446-bc7d-95cbb2dc5343"
-    shein_vn_bulk_reship_question_id = 70699
-    mtb = MetabaseClient(session_id=session_id)
+    shein_vn_bulk_reship_question_id = configs.get("SHEIN_VN_BULK_RESHIP_QUESTION_ID")
+    mtb = MetabaseClient()
     return mtb.execute_question(shein_vn_bulk_reship_question_id)
