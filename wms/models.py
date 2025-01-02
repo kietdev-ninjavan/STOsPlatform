@@ -6,6 +6,7 @@ class OrigOrders(BaseModel):
     date_input = models.CharField(max_length=255, blank = True)
     tracking_id = models.CharField(max_length=255, blank = True)
     granular_status = models.CharField(max_length=255, blank = True)
+    weight = models.FloatField(null=True, blank=True, default=-1)
     wms_status = models.CharField(max_length=255, blank = True)
     bin_name = models.CharField(max_length=255, blank = True)
     putaway_datetime = models.CharField(max_length=255, blank = True)

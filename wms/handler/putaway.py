@@ -1,16 +1,22 @@
 import logging
 from datetime import datetime, timedelta
+
+from requests.exceptions import HTTPError, RequestException
+
 from opv2.base.wms import WMSBin
 from opv2.services import WMSService
-from requests.exceptions import HTTPError, RequestException
 
 logger = logging.getLogger(__name__)
 
 def wms_putaway():
     """
-        Load orders automatically ASN Uploaded on WMS
-        Putaway SHEIN orders
+        Process : 
+            
+                1. Load orders automatically ASN Uploaded on WMS
+                2. Putaway SHEIN orders
     """
+    
+    # Load SHEIN ASN Uploaded orders within 2 days ago
     wms = WMSService()
     to_putaway = []
     try : 
@@ -39,7 +45,7 @@ def wms_putaway():
         logger.error(f"Error when load ASN orders from WMS Service: {e}")
         raise e
     
-    
+    # Putaway orders
     code_putaway, response_putaway = wms.putaway_orders(
         tracking_ids=[order["tracking_id"] for order in to_putaway],
         bin= WMSBin

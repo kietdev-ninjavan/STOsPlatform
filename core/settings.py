@@ -55,7 +55,8 @@ INSTALLED_APPS = [
     'add_tag.apps.AddTagConfig',
     'shein.apps.SheinConfig',
     'fail_delivery.apps.FailDeliveryConfig',
-    'wms.apps.WmsConfig'
+    'wms.apps.WmsConfig',
+    'metabase.apps.MetabaseConfig'
 ]
 
 MIDDLEWARE = [

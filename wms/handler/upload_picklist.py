@@ -1,20 +1,27 @@
 import logging
 from typing import List
+
+from requests.exceptions import HTTPError, RequestException
+
 from opv2.base.wms import WMSAction
 from opv2.services import WMSService
-from requests.exceptions import HTTPError, RequestException
 
 logger = logging.getLogger(__name__)
 
 def wms_upload_picklist(orders: List[str]) -> List[dict]:
     """
-        ***Only use for BULK RESHIP processs
+        ONLY USE FOR BULK RESHIP PROCESS
+        
         Process: 
-            Upload picklist to WMS : Status change IN_WAREHOUSE -> PICK_REQUESTED
-            Download picklist : Status change PICK_REQUESTED -> PENDING_PICK
+        
+                1. Upload picklist : Status change IN_WAREHOUSE -> PICK_REQUESTED
+                2. Download picklist : Status change PICK_REQUESTED -> PENDING_PICK
         
         Args: 
             orders : list of orders from Metabase Bulk Reship daily
+            
+        Returns:
+            List of response from WMS
     """
     wms = WMSService()
     pick_action = WMSAction.reship

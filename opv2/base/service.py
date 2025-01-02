@@ -253,7 +253,7 @@ class WMSTokenManager(metaclass=SingletonMeta):
     Duplicate from TokenManager line #20
     """
 
-    TOKEN_CACHE_KEY = "opv2_auth_token"
+    TOKEN_CACHE_KEY = "wms_auth_token"
     TOKEN_CACHE_TIMEOUT = 60 * 60 * 26  # 26 hours
 
     def __init__(self, logger: logging.Logger = logging.getLogger(__name__)):
