@@ -72,6 +72,7 @@ def creat_ms_again_task():
 def handle_proactive():
     collect_vendor_call_proactive()
     load_order_info()
+    reschedule_order()
     load_ticket_info_proactive()
     cancel_ticket_proactive()
     load_order_info()
