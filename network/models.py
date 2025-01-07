@@ -39,6 +39,7 @@ class Hub(BaseModel):
     opv2_updated_at = models.DateTimeField(auto_now=True)
     virtual_hub = models.BooleanField(default=False)
     parent_hub = models.CharField(max_length=255, null=True, blank=True)
+    b2b_hub = models.ForeignKey('HubB2B', on_delete=models.CASCADE, verbose_name="B2B Hub", null=True, blank=True)
 
     class Meta:
         verbose_name = 'Hub'
@@ -46,3 +47,10 @@ class Hub(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class HubB2B(BaseModel):
+    hub_name = models.CharField(max_length=255)
+    code = models.CharField(max_length=255)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
