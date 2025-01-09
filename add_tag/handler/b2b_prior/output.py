@@ -22,6 +22,6 @@ def out_to_sheet(tracking_ids: list):
 
     gsheet_service.add_dataframe(
         dataframe=df,
-        worksheet=configs.get('PRIOR_B2B_OUTPUT_WORKSHEET_ID'),
+        worksheet=configs.get('PRIOR_B2B_OUTPUT_WORKSHEET_ID', cast=int),
         append=True
     )
