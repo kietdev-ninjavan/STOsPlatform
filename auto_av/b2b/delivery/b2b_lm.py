@@ -58,13 +58,13 @@ def address_verification_to_b2b_lm():
                     longitude=longitude,
                 ))
 
-                order_service = OrderService(logger)
+            order_service = OrderService(logger)
 
-                stt_code, result = order_service.bulk_update_av(update_info)
+            stt_code, result = order_service.bulk_update_av(update_info)
 
-                if stt_code != 200:
-                    logger.error(f"Error occurred when updating AV: {result}")
-                    raise Exception("Error occurred when updating AV in OPv2")
+            if stt_code != 200:
+                logger.error(f"Error occurred when updating AV: {result}")
+                raise Exception("Error occurred when updating AV in OPv2")
 
     except Exception as e:
         logger.error(f"Error occurred while processing orders: {e}")
