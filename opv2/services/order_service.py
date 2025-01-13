@@ -277,6 +277,7 @@ class OrderService(BaseService):
                 'av_statuses': [
                     'VERIFIED'
                 ],
+                'rts': False,
                 # Turn this on when run officially
                 "global_shipper_ids": shipper_ids,
                 'av_sources': [
