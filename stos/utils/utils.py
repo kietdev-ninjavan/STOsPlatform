@@ -141,6 +141,8 @@ def parse_datetime(date_string: str, custom_formats: Optional[List[str]] = None)
         "%d-%m-%Y %H:%M",  # Date and time without seconds
         "%Y-%m-%dT%H:%M:%SZ",  # Date and time in ISO 8601 format
         "%Y-%m-%dT%H:%M:%S.%fZ",  # Date and time in ISO 8601 format with microseconds
+        "%Y-%m-%dT%H:%M:%S%z",  # Date and time in ISO 8601 format with timezone
+        "%Y-%m-%dT%H:%M:%S.%f%z",  # Date and time in ISO 8601 format with microseconds
     ]
 
     # Add custom formats if provided

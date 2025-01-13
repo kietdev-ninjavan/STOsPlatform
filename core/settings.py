@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'pre_success.apps.PreSuccessConfig',
     'add_tag.apps.AddTagConfig',
     'shein.apps.SheinConfig',
+    'auto_av.apps.AutoAvConfig',
 ]
 
 MIDDLEWARE = [

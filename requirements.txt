@@ -28,6 +28,8 @@ django-redis==5.4.0
 django-simple-history==3.7.0
 django-timezone-field==7.0
 executing==2.1.0
+fireducks==1.1.6
+firefw==1.1.6
 flake8==7.1.1
 flower==2.0.1
 google-ai-generativelanguage==0.6.10
@@ -81,6 +83,7 @@ protobuf==5.28.2
 ptyprocess==0.7.0
 pure_eval==0.2.3
 py==1.11.0
+pyarrow==18.1.0
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pycodestyle==2.12.1
