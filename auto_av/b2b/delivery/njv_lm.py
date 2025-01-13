@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 from django.db.models import Q
 from collections import OrderedDict
-from network.models import Hub
+from network.models import Zone
 from opv2.dto import BulkAVDTO
 import fireducks.pandas as pd
 from opv2.services import OrderService
@@ -93,14 +93,14 @@ def update_parcel_size():
         else:
             logger.error(f"Order {order.tracking_id} not found DWS")
 
-def __get_hub_njv_coordinates(hub_id):
+def __get_zone_njv_coordinates(zone_id):
     try:
         # Fetch the Hub object by its ID
-        hub = Hub.objects.get(id=hub_id)
+        hub = Zone.objects.get(id=zone_id)
         latitude = hub.latitude
         longitude = hub.longitude
         return latitude, longitude
-    except Hub.DoesNotExist:
+    except Zone.DoesNotExist:
         return None, None
 
 
@@ -131,7 +131,7 @@ def address_verification_to_njv_lm():
             update_info = []
             for order in unique_orders:
                 # Get latitude and longitude from order
-                latitude, longitude = __get_hub_njv_coordinates(order.hub_id)
+                latitude, longitude = __get_zone_njv_coordinates(order.zone_id)
 
                 update_info.append(BulkAVDTO(
                     waypoint=order.waypoint,
