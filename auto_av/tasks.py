@@ -16,7 +16,7 @@ def b2b_av_b2b_lm():
     address_verification_to_b2b_lm()
 
 
-@shared_task(name='[Auto AV B2B LM] AV To B2B', base=STOsParallel)
+@shared_task(name='[Auto AV B2B LM] AV To NJV', base=STOsParallel)
 def b2b_av_njv_lm():
     update_order_info()
     update_parcel_size()
