@@ -1,6 +1,7 @@
 import logging
 
 from django.db.models import Q
+from django.db.models.functions import Lower
 from django.utils import timezone
 from simple_history.utils import bulk_update_with_history
 
@@ -64,17 +65,21 @@ def __resolve_tickets(tickets, new_instruction, action_reason):
 
 
 def solve_ticket_have_alo_link():
-    tickets = TicketChangeAddress.objects.filter(
+    tickets = TicketChangeAddress.objects.annotate(
+        exception_reason_lower=Lower('exception_reason'),
+        notes_lower=Lower('notes'),
+        comments_lower=Lower('comments'),
+    ).filter(
         Q(action__isnull=True)
         & (
-                Q(exception_reason__icontains='https://alo.njv.vn')
-                | Q(notes__icontains='https://alo.njv.vn')
-                | Q(comments__icontains='https://alo.njv.vn')
+                Q(exception_reason_lower__icontains='https://alo.njv.vn')
+                | Q(notes_lower__icontains='https://alo.njv.vn')
+                | Q(comments_lower__icontains='https://alo.njv.vn')
         )
         & (
-                Q(exception_reason__icontains='đồng ý RTS')
-                | Q(notes__icontains='đồng ý RTS')
-                | Q(comments__icontains='đồng ý RTS')
+                Q(exception_reason_lower__icontains='đồng ý RTS'.lower())
+                | Q(notes_lower__icontains='đồng ý RTS'.lower())
+                | Q(comments_lower__icontains='đồng ý RTS'.lower())
         )
     )
 
