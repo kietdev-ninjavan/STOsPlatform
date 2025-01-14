@@ -245,9 +245,8 @@ class BaseService(ABC):
         except Exception as general_error:
             self._logger.error(f"An unexpected error occurred: {general_error}")
             return 500, {'error': f'An unexpected error occurred: {general_error}'}
-        
-        
-        
+
+
 class WMSTokenManager(metaclass=SingletonMeta):
     """
     Duplicate from TokenManager line #20
@@ -304,7 +303,7 @@ class WMSTokenManager(metaclass=SingletonMeta):
                 logger=self.__logger
             )
             return gsheets_service.read_cell(
-                cell='B2',
+                cell=configs.get('WMS_TOKEN_CELL'),
                 worksheet=configs.get('OPV2_TOKEN_WORKSHEET_ID', cast=int)
             )
         except ServiceAccount.DoesNotExist:
@@ -400,9 +399,9 @@ class WMSTokenManager(metaclass=SingletonMeta):
         Returns:
             str: Cached token or None if not set.
         """
-        return cache.get(self.TOKEN_CACHE_KEY)        
-        
-        
+        return cache.get(self.TOKEN_CACHE_KEY)
+
+
 class WMSBaseService(ABC):
     """
     Base class for API services handling shared logic such as session management and authorization.
@@ -464,9 +463,7 @@ class WMSBaseService(ABC):
             response = self.session.request(method, url, json=payload, files=files, data=data, params=params)
             self._logger.info(f"{response.url} {response.request.method} {response.status_code}")
             response.raise_for_status()
-            
-            # if response.status_code == 503: 
-            #     return 503, {'error': 'Service Unavailable'}
+
             return self._process_response(response)
 
         except requests.exceptions.HTTPError as http_error:

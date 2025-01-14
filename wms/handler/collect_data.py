@@ -1,28 +1,29 @@
-import logging
 import copy
-from typing import List
+import logging
 from datetime import datetime, timedelta
+from typing import List
 
 from django.db.models import Q
+from gql import gql
 from simple_history.utils import bulk_create_with_history, bulk_update_with_history
 
-from gql import gql
-from stos.utils import configs, chunk_list, check_record_change
-from opv2.services import GraphQLService, WMSService, OrderService
 from opv2.dto.order_dto import AllOrderSearchFilterDTO
+from opv2.services import GraphQLService, WMSService, OrderService
+from stos.utils import chunk_list, check_record_change
 from ..models import OrigOrders
 
 logger = logging.getLogger(__name__)
 
+
 def load_warehouse_success() -> List[dict]:
     """
         Load SHEIN orders updated "FORCED SUCCESS" by HCM warehouse
-        
-        Returns : 
+
+        Returns :
             List[dict] : A list of date and tracking ids
     """
-    
-    # Timestamp range for searching : within previous 1 day 
+
+    # Timestamp range for searching : within previous 1 day
     start_date = (datetime.today() - timedelta(days=2)).replace(hour=17, minute=00, second=00)
     end_date = (datetime.today() - timedelta(days=1)).replace(hour=23, minute=59, second=59)
     orders = OrderService()
@@ -47,7 +48,7 @@ def load_warehouse_success() -> List[dict]:
         logger.info("No SHEIN RTS success order found")
         return []
 
-    # Use GraphQL to get order info 
+    # Use GraphQL to get order info
     tracking_ids = [key for key, value in shein_rts_ss.items()]
     orders_info = []
     graphql_client = GraphQLService(
@@ -56,7 +57,7 @@ def load_warehouse_success() -> List[dict]:
     )
     query = gql("""
         query ($trackingOrStampIds: [String!]!, $offset: Int!) {
-            listOrders(tracking_or_stamp_ids: $trackingOrStampIds, offset: $offset) {    
+            listOrders(tracking_or_stamp_ids: $trackingOrStampIds, offset: $offset) {
                 order {
                     trackingId
                     globalShipperId
@@ -105,8 +106,8 @@ def load_warehouse_success() -> List[dict]:
 
 def warehouse_holding():
     """
-        Process : 
-        
+        Process :
+
                 1. Collect SHEIN holding orders at Warehouse
                 2. Update to database
     """
@@ -131,7 +132,7 @@ def warehouse_holding():
                     tracking_id=value["tracking_id"]
                 )
             )
-        except Exception as e:
+        except Exception:
             logger.error(f"Error when creating new record: Row {index + 1}")
     if new_record:
         creator = bulk_create_with_history(new_record, OrigOrders)
@@ -142,16 +143,16 @@ def warehouse_holding():
 
 def update_opv2_info():
     """
-        Process : 
-        
+        Process :
+
                 1. Retrieve orders from DB without "Returned to Sender" or None status
                 2. Refresh last status from Opv2
                 3. Update to database
     """
     pending_orders = OrigOrders.objects.filter(
         ~Q(granular_status='Returned to Sender') |
-        Q(granular_status__isnull=True) | 
-        Q(weight= -1)
+        Q(granular_status__isnull=True) |
+        Q(weight=-1)
     )
 
     if not pending_orders:
@@ -165,7 +166,7 @@ def update_opv2_info():
     )
     query = gql("""
         query ($trackingOrStampIds: [String!]!, $offset: Int!) {
-            listOrders(tracking_or_stamp_ids: $trackingOrStampIds, offset: $offset) {    
+            listOrders(tracking_or_stamp_ids: $trackingOrStampIds, offset: $offset) {
                 order {
                     trackingId
                     granularStatus
@@ -212,8 +213,8 @@ def update_opv2_info():
 
 def update_wms_info():
     """
-        Process : 
-        
+        Process :
+
                 1. Retrieve orders from DB with "Returned to Sender" status and not enough WMS info
                 2. Refresh info from WMS
                 3. Update to database
@@ -234,7 +235,7 @@ def update_wms_info():
 
     wms = WMSService()
     orders_info = []
-    
+
     for order in pending_orders:
         tracking_id = order.tracking_id
         try:
@@ -257,7 +258,7 @@ def update_wms_info():
         new_record.pending_pick_timestamp = order_info["pending_pick_timestamp"] if order_info["pending_pick_timestamp"] else ""
         new_record.pick_timestamp = order_info["pick_timestamp"] if order_info["pick_timestamp"] else ""
         new_record.pack_timestamp = order_info["pack_timestamp"] if order_info["pack_timestamp"] else ""
-        new_record.auto_dispose = 1 if order_info["auto_dispose"] == True else 0
+        new_record.auto_dispose = order_info["auto_dispose"]
         is_updated, existing_record, _ = check_record_change(
             existing_record=order,
             updated_record=new_record,

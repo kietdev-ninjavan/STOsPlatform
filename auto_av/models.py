@@ -1,5 +1,7 @@
 from django.db import models
+
 from opv2.base.order import BaseOrder
+
 
 class StageChoices(models.TextChoices):
     B2B_AV = "B2B-AV", "B2B-AV"
@@ -7,6 +9,7 @@ class StageChoices(models.TextChoices):
     LM_AV = "LM-AV", "LM-AV"
     IN_QUEUE = "In Queue", "In Queue"
     NOT_VERIFIED = "Not Verified", "Not Verified"
+
 
 class OrderB2B(BaseOrder):
     shipper_id = models.BigIntegerField(blank=True, null=True)
