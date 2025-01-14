@@ -3,21 +3,20 @@ from datetime import datetime
 
 from simple_history.utils import bulk_create_with_history
 
-from stos.utils import configs
+from metabase.client import MetabaseClient
 from opv2.base.wms import WMSAction
 from opv2.services import WMSService
-from metabase.client import MetabaseClient
+from stos.utils import configs
 from .upload_picklist import wms_upload_picklist
 from ..models import ReshipOrders, OrigOrders
-
 
 logger = logging.getLogger(__name__)
 
 
 def wms_bulk_reship():
     """
-        Process : 
-        
+        Process :
+
                 1. Get orders from Metabase Bulk Reship daily
                 2. Upload picklist : Status change "IN_WAREHOUSE" to "PICK_REQUESTED"
                 3. Download picklist : Status change "PICK_REQUESTED" to "PENDING_PICK"
@@ -25,7 +24,7 @@ def wms_bulk_reship():
                 5. Pack orders
                 6. Update to DB
     """
-    
+
     # Get orders from Metabase Bulk Reship daily
     source = metabase_bulk_reship()
     if not source:
@@ -88,7 +87,7 @@ def wms_bulk_reship():
         new_record = []
         retrieve_orders = OrigOrders.objects.filter(tracking_id__in=success_picked)
         weights = [
-            { value.tracking_id : value.weight} 
+            {value.tracking_id: value.weight}
             for value in retrieve_orders
         ]
         for index, tracking_id in success_packed:
@@ -105,7 +104,7 @@ def wms_bulk_reship():
                     )
                 )
             except Exception as e:
-                logger.error(f"Error when creating new record: Row {index + 1}")
+                logger.error(f"Error when creating new record: Row {index + 1} {e}")
         if new_record:
             creator = bulk_create_with_history(new_record, ReshipOrders)
             logger.info(f"Created {len(creator)} new records")
@@ -127,7 +126,7 @@ def metabase_bulk_reship():
     Returns:
         List[dict] : A list of dict response content.
     """
-    
+
     shein_vn_bulk_reship_question_id = configs.get("SHEIN_VN_BULK_RESHIP_QUESTION_ID")
     mtb = MetabaseClient()
     return mtb.execute_question(shein_vn_bulk_reship_question_id)

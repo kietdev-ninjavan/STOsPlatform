@@ -56,7 +56,7 @@ INSTALLED_APPS = [
     'shein.apps.SheinConfig',
     'fail_delivery.apps.FailDeliveryConfig',
     'wms.apps.WmsConfig',
-    'metabase.apps.MetabaseConfig'
+    'metabase.apps.MetabaseConfig',
     'auto_av.apps.AutoAvConfig',
 ]
 

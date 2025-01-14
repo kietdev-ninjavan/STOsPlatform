@@ -1,8 +1,10 @@
+import logging
+
 from google_wrapper.services import GoogleSheetService
 from google_wrapper.utils import get_service_account
-import logging
 from stos.utils import configs
 from .models import HubB2B, Hub
+
 logger = logging.getLogger(__name__)
 
 
@@ -41,14 +43,11 @@ def manual_sync_b2b_zone():
                 longitude=row.get('longitude')
             )
 
-
         # Update the Hub object
         hub.b2b_hub = b2b_hub_obj
         update.append(hub)
-
 
     # Bulk update the Hub objects
     Hub.objects.bulk_update(update, ['b2b_hub'])
 
     logger.info(f"B2B Hub sync completed. {len(update)}/{len(data)} Hubs updated.")
-

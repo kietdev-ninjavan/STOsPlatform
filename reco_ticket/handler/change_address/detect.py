@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from typing import List
 
 from django.db.models import Q
@@ -8,7 +9,7 @@ from simple_history.utils import bulk_create_with_history
 from google_wrapper.services import GenminiAIService
 from stos.utils import configs, chunk_list
 from ...models import TicketChangeAddress, DetectChangeAddress
-import re
+
 logger = logging.getLogger(__name__)
 
 

@@ -1,5 +1,6 @@
 import logging
 from typing import Optional, List
+
 from .base_api import BaseAPI
 
 logger = logging.getLogger(__name__)
@@ -97,7 +98,7 @@ class MetabaseClient(BaseAPI):
         columns = [value["display_name"] for value in data.get("cols")]
         rows = data.get("rows")
         if not rows:
-            self.__logger.error(f"No data returned for this execution")
+            self.__logger.error("No data returned for this execution")
             return []
 
         result = [

@@ -8,24 +8,25 @@ from opv2.services import WMSService
 
 logger = logging.getLogger(__name__)
 
+
 def wms_upload_picklist(orders: List[str]) -> List[dict]:
     """
         ONLY USE FOR BULK RESHIP PROCESS
-        
-        Process: 
-        
+
+        Process:
+
                 1. Upload picklist : Status change IN_WAREHOUSE -> PICK_REQUESTED
                 2. Download picklist : Status change PICK_REQUESTED -> PENDING_PICK
-        
-        Args: 
+
+        Args:
             orders : list of orders from Metabase Bulk Reship daily
-            
+
         Returns:
             List of response from WMS
     """
     wms = WMSService()
     pick_action = WMSAction.reship
-    try: 
+    try:
         code, response = wms.upload_picklist(orders, pick_action)
         if code != 200:
             logger.error(f"Error when upload picklist to WMS Service: {response}")

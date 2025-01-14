@@ -1,11 +1,12 @@
 import logging
+from collections import OrderedDict
 
+import fireducks.pandas as pd
 from django.db import transaction
 from django.db.models import Q
-from collections import OrderedDict
+
 from network.models import Zone
 from opv2.dto import BulkAVDTO
-import fireducks.pandas as pd
 from opv2.services import OrderService
 from ...models import OrderB2B, StageChoices
 
@@ -93,6 +94,7 @@ def update_parcel_size():
         else:
             logger.error(f"Order {order.tracking_id} not found DWS")
 
+
 def __get_zone_njv_coordinates(zone_id):
     try:
         # Fetch the Hub object by its ID
@@ -109,7 +111,7 @@ def address_verification_to_njv_lm():
         Q(stage=StageChoices.B2B_AV)
         & ~Q(shipper_id__in=[10180487])
         & Q(mps_sequence_number=1)
-        & Q(parcel_size__in=[5,0,1,2])
+        & Q(parcel_size__in=[5, 0, 1, 2])
     )
 
     if not orders.exists():

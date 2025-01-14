@@ -1,6 +1,5 @@
 import logging
 import time
-from typing import Any
 
 import requests
 from django.core.cache import cache
@@ -171,6 +170,7 @@ class SessionManager(metaclass=SingletonMeta):
         """
         return cache.get(self.SESSION_CACHE_KEY)
 
+
 class BaseAPI:
     """
     A base class for making API requests.
@@ -217,7 +217,7 @@ class BaseAPI:
             return response.status_code, response.json()
 
         return response.status_code, {}
-    
+
     @SessionManager.auto_update_session
     def make_request(self, url: str, method: str = 'GET', payload: dict = None, files: dict = None):
         """

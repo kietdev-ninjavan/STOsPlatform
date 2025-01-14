@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 from typing import List, Tuple, Union, Dict
-import time
+
 import fireducks.pandas as pd
 from django.utils import timezone
 from pandas.core.interchange.dataframe_protocol import DataFrame
@@ -264,8 +264,7 @@ class OrderService(BaseService):
 
         return 200, {'success': success, 'failed': failed}
 
-    def parcel_address_search(self, shipper_ids: List[int], df: bool = False) -> Tuple[
-        int, Union[List[AddressDTO], DataFrame]]:
+    def parcel_address_search(self, shipper_ids: List[int], df: bool = False) -> Tuple[int, Union[List[AddressDTO], DataFrame]]:
         url = f"{self._base_url}/av/parceladdress/search/paginated"
         payload = {
             'from': 0,
