@@ -3,9 +3,10 @@ from collections import OrderedDict
 
 import pandas as pd
 from django.db import transaction
-from django.db.models import Q
-from opv2.base.order import GranularStatusChoices
+from django.db.models import Q, Count
+
 from network.models import Zone
+from opv2.base.order import GranularStatusChoices
 from opv2.dto import BulkAVDTO
 from opv2.services import OrderService
 from ...models import OrderB2B, StageChoices
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 def update_order_info():
     orders = OrderB2B.objects.filter(
         Q(stage=StageChoices.B2B_AV)
-        & Q(granular_status__isnull=True)
+        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
     )
 
     if not orders.exists():
@@ -46,7 +47,9 @@ def update_order_info():
 
     try:
         with transaction.atomic():
-            OrderB2B.objects.bulk_update(update, ['granular_status', 'status', 'rts', 'mps_id', 'mps_sequence_number'])
+            OrderB2B.objects.bulk_update(update, ['granular_status', 'status', 'rts', 'mps_id', 'mps_sequence_number'], batch_size=1000)
+
+        logger.info(f"Updated {len(update)} orders")
     except Exception as e:
         logger.error(f"Error when updating order info: {e}")
 
@@ -67,20 +70,32 @@ def __get_first_dws(data):
 
 
 def update_parcel_size():
-    orders = OrderB2B.objects.filter(
-        Q(stage=StageChoices.B2B_AV)
-        & ~Q(shipper_id__in=[10180487])
-        & Q(mps_sequence_number=1)
-        & Q(parcel_size__isnull=True)
-        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
+    orders = (
+        OrderB2B.objects.values('mps_id')
+        .annotate(mps_count=Count('mps_id'))
+        .filter(
+            Q(mps_count=1)
+        )
     )
 
-    if not orders.exists():
+    final_orders = OrderB2B.objects.filter(
+        Q(mps_id__in=[order['mps_id'] for order in orders])
+        & Q(stage=StageChoices.B2B_AV)
+        & ~Q(shipper_id__in=[10180487])
+        & Q(parcel_size__isnull=True)
+        & ~Q(granular_status__in=[
+            GranularStatusChoices.completed,
+            GranularStatusChoices.cancelled,
+            GranularStatusChoices.rts
+        ])
+    )
+
+    if not final_orders.exists():
         logger.info("No orders to update")
         return
 
     order_svc = OrderService(logger)
-    for order in orders:
+    for order in final_orders:
         stt_code, result = order_svc.get_events(order.order_id)
 
         if stt_code != 200:
@@ -111,7 +126,6 @@ def address_verification_to_njv_lm():
     orders = OrderB2B.objects.filter(
         Q(stage=StageChoices.B2B_AV)
         & ~Q(shipper_id__in=[10180487])
-        & Q(mps_sequence_number=1)
         & Q(parcel_size__in=[5, 0, 1, 2])
         & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
     )
