@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'fail_delivery.apps.FailDeliveryConfig',
     'wms.apps.WmsConfig',
     'metabase.apps.MetabaseConfig'
+    'auto_av.apps.AutoAvConfig',
 ]
 
 MIDDLEWARE = [
@@ -312,6 +313,14 @@ LOGGING = {
             'tags': {"tool": "wms"},
             'version': "1",
         },
+        'b2b_av_b2b_lm': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "b2b_av_b2b_lm"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -356,6 +365,10 @@ LOGGING = {
         },
         'wms': {
             'handlers': ['console', 'wms'],
+            'propagate': False,
+        },
+        'auto_av.b2b.delivery': {
+            'handlers': ['console', 'b2b_av_b2b_lm'],
             'propagate': False,
         },
     },

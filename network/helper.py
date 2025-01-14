@@ -24,18 +24,23 @@ def manual_sync_b2b_zone():
         b2b_hub = row.get('b2b_hub')
 
         # Get the Hub object
-        hub = Hub.objects.get(id=hub_id)
-
-        if not hub:
-            logger.warning(f"Hub with ID {hub_id} not found.")
+        try:
+            hub = Hub.objects.get(id=hub_id)
+        except Hub.DoesNotExist:
+            logger.error(f"Hub with ID {hub_id} not found.")
             continue
 
         # Get the B2B Hub object
-        b2b_hub_obj = HubB2B.objects.get(hub_name=b2b_hub)
+        try:
+            b2b_hub_obj = HubB2B.objects.get(hub_name=b2b_hub)
+        except HubB2B.DoesNotExist:
+            b2b_hub_obj = HubB2B.objects.create(
+                hub_name=b2b_hub,
+                code=row.get('code'),
+                latitude=row.get('latitude'),
+                longitude=row.get('longitude')
+            )
 
-        if not b2b_hub_obj:
-            logger.warning(f"B2B Hub with name {b2b_hub} not found.")
-            continue
 
         # Update the Hub object
         hub.b2b_hub = b2b_hub_obj

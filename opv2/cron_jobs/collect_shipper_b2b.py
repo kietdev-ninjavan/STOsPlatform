@@ -56,7 +56,7 @@ def collect_shipper_b2b():
         if new_records:
             created = bulk_create_with_history(new_records, ShipperB2B, batch_size=1000, ignore_conflicts=True)
             total_changed_shippers += len(created)
-            logger.info(f'Created {created} new Shipper B2B records.')
+            logger.info(f'Created {len(created)} new Shipper B2B records.')
         else:
             logger.info('No new Shipper B2B records to create.')
     except Exception as e:

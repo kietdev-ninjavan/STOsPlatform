@@ -1,13 +1,15 @@
 import logging
 from datetime import datetime
 from typing import List, Tuple, Union, Dict
-
+import time
+import fireducks.pandas as pd
 from django.utils import timezone
+from pandas.core.interchange.dataframe_protocol import DataFrame
 
 from stos.utils import chunk_list
 from ..base import BaseService
 from ..base.order import BaseOrder, TagChoices
-from ..dto import OrderDTO, AllOrderSearchFilterDTO
+from ..dto import OrderDTO, AllOrderSearchFilterDTO, AddressDTO, BulkAVDTO
 
 
 class OrderService(BaseService):
@@ -261,3 +263,63 @@ class OrderService(BaseService):
             success.append(order_id)
 
         return 200, {'success': success, 'failed': failed}
+
+    def parcel_address_search(self, shipper_ids: List[int], df: bool = False) -> Tuple[
+        int, Union[List[AddressDTO], DataFrame]]:
+        url = f"{self._base_url}/av/parceladdress/search/paginated"
+        payload = {
+            'from': 0,
+            'size': 10000,
+            'search_criteria': {
+                'created_at': {
+                    'to': (timezone.now() - timezone.timedelta(minutes=10)).strftime('%Y-%m-%dT%H:%M:%S+0700'),
+                    'from': (timezone.now() - timezone.timedelta(days=60)).strftime('%Y-%m-%dT%H:%M:%S+0700')
+                },
+                'av_statuses': [
+                    'VERIFIED'
+                ],
+                'rts': False,
+                # Turn this on when run officially
+                "global_shipper_ids": shipper_ids,
+                'av_sources': [
+                    'Bulk AV',
+                    'Auto AV'
+                ]
+            }
+        }
+        stt_code, data = self.make_request(url, method='POST', payload=payload)
+
+        if stt_code != 200:
+            return stt_code, []
+
+        result = [
+            AddressDTO.form_dict(item) for item in data.get('data', [])
+        ]
+
+        if df:
+            return stt_code, pd.DataFrame([vars(address) for address in result])
+
+        return stt_code, result
+
+    def bulk_update_av(self, data: List[BulkAVDTO]) -> Tuple[int, dict]:
+        url = f"{self._base_url}/av/1.0/verify-address/bulk/update"
+        payload = {"waypoints": [item.to_dict() for item in data]}
+
+        stt_code, result = self.make_request(url, method='POST', payload=payload)
+
+        if stt_code != 200:
+            return stt_code, result
+
+        success_ids = [wp['id'] for wp in result['waypoints'] if wp['status']]
+        failed_ids = [wp['id'] for wp in result['waypoints'] if not wp['status']]
+
+        return stt_code, {"success": success_ids, "failed": failed_ids}
+
+    def get_events(self, order_id: int) -> Tuple[int, dict]:
+        url = f"{self._base_url}/events/1.0/orders/{order_id}/events?masked=false"
+        stt_code, data = self.make_request(url, method='GET')
+
+        if stt_code != 200:
+            return stt_code, data
+
+        return stt_code, data.get('data', [])
