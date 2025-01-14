@@ -54,6 +54,9 @@ INSTALLED_APPS = [
     'pre_success.apps.PreSuccessConfig',
     'add_tag.apps.AddTagConfig',
     'shein.apps.SheinConfig',
+    'fail_delivery.apps.FailDeliveryConfig',
+    'wms.apps.WmsConfig',
+    'metabase.apps.MetabaseConfig'
     'auto_av.apps.AutoAvConfig',
 ]
 
@@ -302,6 +305,14 @@ LOGGING = {
             'tags': {"tool": "shein"},
             'version': "1",
         },
+        'wms': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "wms"},
+            'version': "1",
+        },
         'b2b_av_b2b_lm': {
             'level': LOG_LEVEL,
             'class': 'logging_loki.LokiHandler',
@@ -350,6 +361,10 @@ LOGGING = {
         },
         'shein': {
             'handlers': ['console', 'shein'],
+            'propagate': False,
+        },
+        'wms': {
+            'handlers': ['console', 'wms'],
             'propagate': False,
         },
         'auto_av.b2b.delivery': {

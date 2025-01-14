@@ -1,1 +1,1 @@
-from .service import BaseService
+from .service import BaseService, WMSBaseService

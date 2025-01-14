@@ -51,7 +51,8 @@ class OrderService(BaseService):
 
     def search_all(self, data: List[Union[str, int]], filter_by_shipper: bool = False,
                    search_filters: List[AllOrderSearchFilterDTO] = None,
-                   start_date: datetime = None, end_date: datetime = None) -> Tuple[int, Dict[str, OrderDTO]]:
+                   start_date: datetime = None, end_date: datetime = None,
+                   time_range_type: str = "created_at") -> Tuple[int, Dict[str, OrderDTO]]:
         """
         Searches for orders based on the provided data.
 
@@ -75,8 +76,8 @@ class OrderService(BaseService):
         search_range = None
         if start_date and end_date:
             search_range = {
-                "field": "created_at",
-                "start_time": start_date.strftime('%Y-%m-%dT00:00:00Z'),
+                "field": time_range_type,
+                "start_time": start_date.strftime('%Y-%m-%dT%H:%M:%SZ'),
                 "end_time": end_date.strftime('%Y-%m-%dT%H:%M:%SZ')
             }
 
