@@ -173,7 +173,7 @@ def apply_action():
     tickets = TicketChangeDate.objects.filter(
         Q(action='Approve') &
         Q(apply_action__isnull=True) &
-        Q(detected_date=timezone.now().date())
+        Q(detected_date__lte=timezone.now().date())
     )
 
     if not tickets.exists():

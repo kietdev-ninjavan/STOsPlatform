@@ -216,3 +216,105 @@ def load_ticket_info_sla():
 
     success = bulk_update_with_history(update_orders, Order, batch_size=1000, fields=['ticket_id', 'investigating_hub_id', 'last_instruction'])
     logger.info(f"Updated {success}/{len(orders)} orders with ticket info")
+
+
+def collect_vendor_call_proactive():
+    gsheet_service = GoogleSheetService(
+        service_account=get_service_account(configs.get('GSA_BI')),
+        spreadsheet_id=configs.get('PSS_VENDOR_PROACTIVE_SPREADSHEET_ID'),
+        logger=logger
+    )
+
+    records = gsheet_service.get_all_records(configs.get('PSS_VENDOR_PROACTIVE_WORKSHEET_ID', cast=int))
+
+    if not records:
+        logger.info("No data found in the Google Sheet")
+        return
+
+    for chunk in chunk_list(records, 1000):
+        tracking_ids = [record.get('tracking_id') for record in chunk]
+        project_calls = [record.get('project_call') for record in chunk]
+
+        # Fetch existing orders only with the fields needed and store in a set for faster lookup
+        existing_orders = set(
+            Order.objects.filter(
+                Q(tracking_id__in=tracking_ids) &
+                Q(project_call__in=project_calls)
+            ).values_list('tracking_id', 'project_call')
+        )
+
+        new_records = []
+        for index, row in enumerate(chunk):
+            # Check against the set instead of querying the database
+            if (row.get('tracking_id'), row.get('project_call')) in existing_orders:
+                continue
+
+            if not row.get('tracking_id'):
+                logger.warning(f"Row {index + 1} empty tracking_id, skipping")
+                continue
+
+            # Process new records as needed
+            try:
+                new_records.append(Order(
+                    tracking_id=row.get('tracking_id'),
+                    project_call=row.get('project_call'),
+                    time_stamp=row.get('time_stamp'),
+                    dest_hub_id=row.get('dest_hub_id'),
+                    shipper_group=row.get('shipper_group')
+                ))
+            except Exception as e:
+                logger.error(f'Can not add row {index + 1} to Database: {e}')
+                continue
+
+        # Bulk create new records here if needed
+        if new_records:
+            success = bulk_create_with_history(new_records, Order, batch_size=1000, ignore_conflicts=True)
+            logger.info(f"Successfully added {len(success)} new records to the database")
+        else:
+            logger.info("No new records to add to the database")
+
+
+def load_ticket_info_proactive():
+    orders = Order.objects.filter(
+        Q(created_date__date=timezone.now().date()) &
+        Q(project_call__icontains='Proactive') &
+        Q(route__isnull=True) &
+        Q(ticket_id__isnull=True)
+    )
+
+    if not orders:
+        logger.info("No Proactive orders available")
+        return
+
+    tracking_ids = orders.values_list('tracking_id', flat=True)
+
+    ticket_service = TicketService(logger=logger)
+    stt_code, ticket_info = ticket_service.get_ticket_by_tracking_ids(tracking_ids, ticket_types=[
+        TicketTypeChoices.MISSING,
+        TicketTypeChoices.PARCEL_EXCEPTION,
+        TicketTypeChoices.SHIPPER_ISSUE,
+        TicketTypeChoices.PARCEL_ON_HOLD
+    ])
+
+    if stt_code != 200:
+        logger.error('Fail get ticket proactive')
+        return
+
+    if not ticket_info:
+        logger.info("No ticket info found for the orders")
+        return
+    ticket_ids = [item.id for item in ticket_info]
+    last_instructions = __get_last_instruction(ticket_ids)
+    map_tracking_ticket = {item.tracking_id: item for item in ticket_info}
+
+    update_orders = []
+    for order in orders:
+        ticket = map_tracking_ticket.get(order.tracking_id, None)
+        if ticket:
+            order.ticket_id = ticket.id
+            order.investigating_hub_id = ticket.investigating_hub_id
+            order.last_instruction = last_instructions.get(ticket.id, None)
+            update_orders.append(order)
+
+    success = bulk_update_with_history(update_orders, Order, batch_size=1000, fields=['ticket_id', 'investigating_hub_id', 'last_instruction'])
+    logger.info(f"Updated {success}/{len(orders)} orders with ticket info")
