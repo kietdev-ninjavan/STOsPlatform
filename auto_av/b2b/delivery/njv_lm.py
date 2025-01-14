@@ -1,10 +1,10 @@
 import logging
 from collections import OrderedDict
 
-import fireducks.pandas as pd
+import pandas as pd
 from django.db import transaction
 from django.db.models import Q
-
+from opv2.base.order import GranularStatusChoices
 from network.models import Zone
 from opv2.dto import BulkAVDTO
 from opv2.services import OrderService
@@ -72,6 +72,7 @@ def update_parcel_size():
         & ~Q(shipper_id__in=[10180487])
         & Q(mps_sequence_number=1)
         & Q(parcel_size__isnull=True)
+        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
     )
 
     if not orders.exists():
@@ -112,6 +113,7 @@ def address_verification_to_njv_lm():
         & ~Q(shipper_id__in=[10180487])
         & Q(mps_sequence_number=1)
         & Q(parcel_size__in=[5, 0, 1, 2])
+        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
     )
 
     if not orders.exists():
