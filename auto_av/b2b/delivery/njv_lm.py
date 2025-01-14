@@ -3,9 +3,10 @@ from collections import OrderedDict
 
 import pandas as pd
 from django.db import transaction
-from django.db.models import Q
-from opv2.base.order import GranularStatusChoices
+from django.db.models import Q, Count
+
 from network.models import Zone
+from opv2.base.order import GranularStatusChoices
 from opv2.dto import BulkAVDTO
 from opv2.services import OrderService
 from ...models import OrderB2B, StageChoices
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 def update_order_info():
     orders = OrderB2B.objects.filter(
         Q(stage=StageChoices.B2B_AV)
-        & Q(granular_status__isnull=True)
+        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
     )
 
     if not orders.exists():
@@ -67,12 +68,19 @@ def __get_first_dws(data):
 
 
 def update_parcel_size():
-    orders = OrderB2B.objects.filter(
-        Q(stage=StageChoices.B2B_AV)
-        & ~Q(shipper_id__in=[10180487])
-        & Q(mps_sequence_number=1)
-        & Q(parcel_size__isnull=True)
-        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
+    orders = (
+        OrderB2B.objects.annotate(mps_count=Count('mps_id'))
+        .filter(
+            Q(stage=StageChoices.B2B_AV)
+            & ~Q(shipper_id__in=[10180487])
+            & Q(mps_count=1)
+            & Q(parcel_size__isnull=True)
+            & ~Q(granular_status__in=[
+                GranularStatusChoices.completed,
+                GranularStatusChoices.cancelled,
+                GranularStatusChoices.rts
+            ])
+        )
     )
 
     if not orders.exists():
@@ -108,12 +116,19 @@ def __get_zone_njv_coordinates(zone_id):
 
 
 def address_verification_to_njv_lm():
-    orders = OrderB2B.objects.filter(
-        Q(stage=StageChoices.B2B_AV)
-        & ~Q(shipper_id__in=[10180487])
-        & Q(mps_sequence_number=1)
-        & Q(parcel_size__in=[5, 0, 1, 2])
-        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
+    orders = (
+        OrderB2B.objects.annotate(mps_count=Count('mps_id'))
+        .filter(
+            Q(stage=StageChoices.B2B_AV)
+            & ~Q(shipper_id__in=[10180487])
+            & Q(mps_count=1)
+            & Q(parcel_size__in=[5, 0, 1, 2])
+            & ~Q(granular_status__in=[
+                GranularStatusChoices.completed,
+                GranularStatusChoices.cancelled,
+                GranularStatusChoices.rts
+            ])
+        )
     )
 
     if not orders.exists():
