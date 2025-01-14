@@ -69,26 +69,31 @@ def __get_first_dws(data):
 
 def update_parcel_size():
     orders = (
-        OrderB2B.objects.annotate(mps_count=Count('mps_id'))
+        OrderB2B.objects.values('mps_id')
+        .annotate(mps_count=Count('mps_id'))
         .filter(
-            Q(stage=StageChoices.B2B_AV)
-            & ~Q(shipper_id__in=[10180487])
-            & Q(mps_count=1)
-            & Q(parcel_size__isnull=True)
-            & ~Q(granular_status__in=[
-                GranularStatusChoices.completed,
-                GranularStatusChoices.cancelled,
-                GranularStatusChoices.rts
-            ])
+            Q(mps_count=1)
         )
     )
 
-    if not orders.exists():
+    final_orders = OrderB2B.objects.filter(
+        Q(mps_id__in=[order['mps_id'] for order in orders])
+        & Q(stage=StageChoices.B2B_AV)
+        & ~Q(shipper_id__in=[10180487])
+        & Q(parcel_size__isnull=True)
+        & ~Q(granular_status__in=[
+            GranularStatusChoices.completed,
+            GranularStatusChoices.cancelled,
+            GranularStatusChoices.rts
+        ])
+    )
+
+    if not final_orders.exists():
         logger.info("No orders to update")
         return
 
     order_svc = OrderService(logger)
-    for order in orders:
+    for order in final_orders:
         stt_code, result = order_svc.get_events(order.order_id)
 
         if stt_code != 200:
@@ -116,19 +121,11 @@ def __get_zone_njv_coordinates(zone_id):
 
 
 def address_verification_to_njv_lm():
-    orders = (
-        OrderB2B.objects.annotate(mps_count=Count('mps_id'))
-        .filter(
-            Q(stage=StageChoices.B2B_AV)
-            & ~Q(shipper_id__in=[10180487])
-            & Q(mps_count=1)
-            & Q(parcel_size__in=[5, 0, 1, 2])
-            & ~Q(granular_status__in=[
-                GranularStatusChoices.completed,
-                GranularStatusChoices.cancelled,
-                GranularStatusChoices.rts
-            ])
-        )
+    orders = OrderB2B.objects.filter(
+        Q(stage=StageChoices.B2B_AV)
+        & ~Q(shipper_id__in=[10180487])
+        & Q(parcel_size__in=[5, 0, 1, 2])
+        & ~Q(granular_status__in=[GranularStatusChoices.completed, GranularStatusChoices.cancelled, GranularStatusChoices.rts])
     )
 
     if not orders.exists():
