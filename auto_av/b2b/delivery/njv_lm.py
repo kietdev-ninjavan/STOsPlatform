@@ -47,7 +47,9 @@ def update_order_info():
 
     try:
         with transaction.atomic():
-            OrderB2B.objects.bulk_update(update, ['granular_status', 'status', 'rts', 'mps_id', 'mps_sequence_number'])
+            OrderB2B.objects.bulk_update(update, ['granular_status', 'status', 'rts', 'mps_id', 'mps_sequence_number'], batch_size=1000)
+
+        logger.info(f"Updated {len(update)} orders")
     except Exception as e:
         logger.error(f"Error when updating order info: {e}")
 
