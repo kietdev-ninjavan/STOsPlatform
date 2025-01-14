@@ -21,20 +21,20 @@ def collect_data():
 def pre_process():
     warehouse_holding()
     wms_putaway()
-    collect_data().apply_sync()
+    collect_data.apply_async()
     
 @shared_task(name="WMS Bulk Reship", base=STOsQueueOnce, once={'graceful': True})
 def reship():
     wms_bulk_reship()
-    collect_data().apply_sync()
+    collect_data.apply_async()
     
 @shared_task(name="WMS Dispose", base=STOsQueueOnce, once={'graceful': True})
 def dispose():
     wms_dispose()
-    collect_data().apply_sync()
+    collect_data.apply_async()
     
 @shared_task(name="WMS Relabel", base=STOsQueueOnce, once={'graceful': True})
 def relabel():
     wms_relabel()
-    collect_data().apply_sync()   
+    collect_data.apply_async()   
 

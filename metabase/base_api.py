@@ -22,7 +22,7 @@ class SessionManager(metaclass=SingletonMeta):
     Tokens are cached and refreshed as needed, with expiration checks and automatic updates.
     """
 
-    SESSION_CACHE_KEY = "metabase_session_ver1"
+    SESSION_CACHE_KEY = "metabase_session"
     SESSION_CACHE_TIMEOUT = 60 * 60 * 24 * 7  # 7 days
 
     def __init__(self, logger: logging.Logger = logging.getLogger(__name__)):
@@ -47,7 +47,7 @@ class SessionManager(metaclass=SingletonMeta):
         """
         card_builder = CardBuilder()
         card_header = CardHeader()
-        card_header.title = "OPv2 Token Manager"
+        card_header.title = "Metabase Session Manager"
         card_header.subtitle = timezone.now().strftime('%d/%m/%Y %H:%M:%S')
         card_builder.set_header(card_header)
 
@@ -80,7 +80,7 @@ class SessionManager(metaclass=SingletonMeta):
             self.__logger.error('Service Account not found.')
             raise
         except Exception as error:
-            self.__logger.error(f'Error reading session from Google Sheet: {error}')
+            self.__logger.error(f'Error reading session ID from Google Sheet: {error}')
             raise
 
     def session_is_alive(self) -> bool:
@@ -92,7 +92,7 @@ class SessionManager(metaclass=SingletonMeta):
         """
         session_id = self.session
         if not session_id:
-            self.__logger.info("No session found in cache, assuming not alive.")
+            self.__logger.info("No session ID found in cache, assuming not alive.")
             return False
 
         url = "https://metabase.ninjavan.co/api/user/current"
@@ -102,13 +102,13 @@ class SessionManager(metaclass=SingletonMeta):
         try:
             response = session.get(url)
             if response.status_code == 200:
-                self.__logger.info("Session is alive.")
+                self.__logger.info("Session ID is alive.")
                 return True
             if response.status_code == 401:
-                self.__logger.info("Session has expired.")
+                self.__logger.info("Session ID has expired.")
                 return False
         except requests.RequestException as error:
-            self.__logger.error(f"Error checking session expiration: {error}")
+            self.__logger.error(f"Error checking session ID expiration: {error}")
             return False
         finally:
             session.close()
@@ -120,8 +120,8 @@ class SessionManager(metaclass=SingletonMeta):
         """
         chat_service = GoogleChatService(logger=self.__logger)
         card = self._build_card(
-            header='<font color="#6953cc">Metabase Session Expired</font>',
-            message=f'Token: "{self.session}".\nPlease update token in Google Sheet.\nRetrying in 60 seconds.'
+            header='<font color="#6953cc">Metabase Session ID Expired</font>',
+            message=f'Session ID: "{self.session}".\nPlease update token in Google Sheet.\nRetrying in 60 seconds.'
         )
         chat_service.webhook_send(self.__webhook_url, card=card)
         time.sleep(60)
@@ -130,15 +130,15 @@ class SessionManager(metaclass=SingletonMeta):
             new_session = self._get_session_from_gsheet()
             if new_session != self.session:
                 cache.set(self.SESSION_CACHE_KEY, new_session, timeout=self.SESSION_CACHE_TIMEOUT)
-                self.__logger.info('Session successfully updated and cached.')
+                self.__logger.info('Session ID successfully updated and cached.')
 
                 card = self._build_card(
                     header='<font color="#e5ea60">Metabase Session Updated</font>',
-                    message=f'Updated token: "{new_session}".'
+                    message=f'Updated session ID: "{new_session}".'
                 )
                 chat_service.webhook_send(self.__webhook_url, card=card)
         except Exception as error:
-            self.__logger.error(f'Error updating token: {error}')
+            self.__logger.error(f'Error updating session ID: {error}')
             raise error
 
     @staticmethod

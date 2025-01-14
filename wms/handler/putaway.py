@@ -25,6 +25,9 @@ def wms_putaway():
             asn_to= datetime.now()
         )
         current_asn_uploaded = response_asn.get("parcels")
+        if not current_asn_uploaded: 
+            logger.info("No ASN Uploaded orders to putaway")
+            return
         shein_asn_uploaded = [
             {
                 "tracking_id": order["tracking_id"],
@@ -36,7 +39,7 @@ def wms_putaway():
         if not shein_asn_uploaded: 
             logger.info("No SHEIN orders to putaway")
             return
-        logger.info(f"Found SHEIN {len(shein_asn_uploaded)} orders to putaway")
+        logger.info(f"Found SHEIN {len(shein_asn_uploaded)} orders to putaway") 
         to_putaway.extend(shein_asn_uploaded)
     except (HTTPError, RequestException) as request_error:
         logger.error(f"Request error when load ASN orders from WMS Service : {request_error}")

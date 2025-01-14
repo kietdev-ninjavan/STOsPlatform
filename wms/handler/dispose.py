@@ -36,7 +36,7 @@ def wms_dispose():
         order["tracking_id"]
         for order in pending_pick_orders
         if order["global_shipper_id"] == 7512979 
-        and order["pick-action"] == "DISPOSE"
+        and order["pick_action"] == "DISPOSE"
         and order["bin_id"] in current_bin_ids
     ]
     

@@ -28,6 +28,11 @@ def wms_relabel():
     wms = WMSService()
     code_pp, response_pp = wms.load_orders_by_status(status=[WMSOrderStatus.pending_pick.value])
     pending_pick_orders = response_pp.get("parcels")
+    logger.info(f"Found {len(pending_pick_orders)} Pending Pick orders ")
+    if not pending_pick_orders: 
+        logger.info("No Pending Pick orders")
+        logger.warning("STOP AT COLLECT PENDING PICK PROCESS!")
+        return
     
     current_bin_ids = [
         bin[0] for bin in WMSBin.choices
@@ -37,7 +42,7 @@ def wms_relabel():
         order["tracking_id"]
         for order in pending_pick_orders
         if order["global_shipper_id"] == 7512979 
-        and order["pick-action"] == "RELABEL"
+        and order["pick_action"] == "RELABEL"
         and order["bin_id"] in current_bin_ids
     ]
     

@@ -1,7 +1,6 @@
 import logging
 from typing import Optional, List
 from .base_api import BaseAPI
-from .exceptions import AuthenticationError
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +10,6 @@ class MetabaseClient(BaseAPI):
     Client to interact with the Metabase API.
 
     Attributes:
-        session_id (str): The Session for authentication.
         __endpoint (str): The endpoint URL for the Metabase instance.
         __logger (logging.Logger): Logger instance for logging API interactions.
     """
@@ -22,8 +20,7 @@ class MetabaseClient(BaseAPI):
         Initialize the MetabaseClient with the provided API key and endpoint.
 
         Args:
-            session_id (str): The Session for authentication.
-            endpoint (Optional[str]): The endpoint URL for the Redash instance.
+            endpoint (Optional[str]): The endpoint URL for the Metabase instance.
                                       Defaults to the value in the environment variable METABASE_ENDPOINT.
             logger (logging.Logger): Optional; logger instance for logging.
         """
@@ -59,8 +56,8 @@ class MetabaseClient(BaseAPI):
             for key, value in parameters.items()
             if value["type"] != "snippet"
         ]
-        self.__logger.info(f"Collected {len(params)} parameters from question {question_id}") 
-        
+        self.__logger.info(f"Collected {len(params)} parameters from question {question_id}")
+
         info = {
             "question_name": response.get("name"),
             "last_query_start": response.get("last_query_start"),
@@ -83,7 +80,7 @@ class MetabaseClient(BaseAPI):
         Returns:
             List[dict]: List of question's result
         """
-        
+
         url = f"{self.__endpoint}/api/card/{question_id}/query"
         payload = {
             "collection_preview": False,
@@ -99,10 +96,10 @@ class MetabaseClient(BaseAPI):
         data = response.get("data")
         columns = [value["display_name"] for value in data.get("cols")]
         rows = data.get("rows")
-        if not rows :
+        if not rows:
             self.__logger.error(f"No data returned for this execution")
             return []
-        
+
         result = [
             {
                 columns[i]: row[i]
@@ -110,6 +107,6 @@ class MetabaseClient(BaseAPI):
             }
             for row in rows
         ]
-        
+
         self.__logger.info(f"Collected {len(result)} rows from question {question_id}")
         return result

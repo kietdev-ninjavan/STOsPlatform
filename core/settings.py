@@ -304,6 +304,14 @@ LOGGING = {
             'tags': {"tool": "shein"},
             'version': "1",
         },
+        'wms': {
+            'level': LOG_LEVEL,
+            'class': 'logging_loki.LokiHandler',
+            'formatter': 'detailed',
+            'url': f"http://{LOKI_IP}:3100/loki/api/v1/push",
+            'tags': {"tool": "wms"},
+            'version': "1",
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -344,6 +352,10 @@ LOGGING = {
         },
         'shein': {
             'handlers': ['console', 'shein'],
+            'propagate': False,
+        },
+        'wms': {
+            'handlers': ['console', 'wms'],
             'propagate': False,
         },
     },

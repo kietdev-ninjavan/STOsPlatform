@@ -9,7 +9,8 @@ from requests.exceptions import (
     HTTPError,
     ConnectionError,
     ConnectTimeout,
-    RequestException
+    RequestException,
+    Timeout
 )
 
 from stos.utils import chunk_list
@@ -72,7 +73,7 @@ class WMSService(WMSBaseService):
         
         return self.make_request(url, method="POST", payload= payload)
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def load_order_by_tracking_id(self, tracking_id: str) -> Tuple[int, dict]:
         """
         Load order info by tracking id from WMS
@@ -102,7 +103,7 @@ class WMSService(WMSBaseService):
         url = f"{self._base_url}/bins?system_id=VN"
         return self.make_request(url, method="GET")
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def create_bag(self) -> Tuple[int, dict]:
         """
         Create bag from WMS
@@ -114,7 +115,7 @@ class WMSService(WMSBaseService):
         url = f"{self._base_url}/bags"
         return self.make_request(url, method="POST", payload={})
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def create_session(self, action: str) -> Tuple[int, dict]:
         """
         Create session from WMS
@@ -126,7 +127,7 @@ class WMSService(WMSBaseService):
         url = f"{self._base_url}/sessions/create"
         return self.make_request(url, method="POST", payload={"type": action})
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def close_session(self, session_id: int) -> Tuple[int, dict]:
         """
         Close session from WMS
@@ -135,10 +136,10 @@ class WMSService(WMSBaseService):
             Tuple[int, dict]: A tuple containing status code and response data.
         """
         
-        url = f"{self._base_url}/session/close/{session_id}"             
+        url = f"{self._base_url}/sessions/close/{session_id}"             
         return self.make_request(url, method="POST")
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def putaway_orders(self, 
                        tracking_ids: List[str],
                        bin : WMSBin) -> Tuple[int, List[Dict]]:
@@ -156,7 +157,7 @@ class WMSService(WMSBaseService):
         if not tracking_ids:
             return 500, {"message" : "No order found to putaway"}
         
-        url = f"{self._base_url}/parcels/putaway"
+        url = f"{self._base_url}/parcels/putawaybulk"
         bin_retrieve = choice(bin.choices)
         logger.info(f'Bin chosen : {bin_retrieve[1]} - id : {bin_retrieve[0]}')
         payload = [
@@ -174,7 +175,7 @@ class WMSService(WMSBaseService):
        
         return code, response  
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def upload_picklist(self,
                         tracking_ids: List[str],
                         pick_action : WMSAction) -> Tuple[int, List[Dict]]:
@@ -206,7 +207,13 @@ class WMSService(WMSBaseService):
         ]
         
         code, response = self.make_request(url, method="POST", payload= payload)
-        response = [ {"tracking_id" : key, "upload_picklist_status" : value} for key,value in response.items()]
+        response = [
+            {
+                "tracking_id" : key, 
+                "upload_picklist_status" : value
+            } 
+            for key, value in response.items()
+        ]
 
         """ 
             Need to download picklist step for changing status from PICK_REQUESTED to PENDING_PICK
@@ -217,7 +224,7 @@ class WMSService(WMSBaseService):
        
         return code, response  
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def pick_orders(self, tracking_ids: List[str]) -> Tuple[int, Dict]:
         """
         Pick orders from WMS
@@ -254,7 +261,7 @@ class WMSService(WMSBaseService):
         return code, result
     
     
-    @retry(exceptions= (HTTPError, ConnectionError, ConnectTimeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
+    @retry(exceptions= (HTTPError, ConnectionError, Timeout,RequestException),tries=3, delay=2, backoff=2, jitter=(1, 3))
     def pack_orders(self, 
                     tracking_ids: List[str],
                     action: WMSAction,

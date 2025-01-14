@@ -24,7 +24,7 @@ def load_warehouse_success() -> List[dict]:
     
     # Timestamp range for searching : within previous 1 day 
     start_date = (datetime.today() - timedelta(days=2)).replace(hour=17, minute=00, second=00)
-    end_date = (datetime.today() - timedelta(days=1)).replace(hour=16, minute=59, second=59)
+    end_date = (datetime.today() - timedelta(days=1)).replace(hour=23, minute=59, second=59)
     orders = OrderService()
     code_info, shein_rts_ss = orders.search_all(
         data=[7512979],
