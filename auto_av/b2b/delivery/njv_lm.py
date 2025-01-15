@@ -193,7 +193,6 @@ def test():
     order_sv = OrderService(logger)
     stt_code, result = order_sv.get_events(379114498)
 
-
     parcel_size_id = __get_first_dws(result)
 
     print(parcel_size_id)
