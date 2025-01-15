@@ -104,7 +104,7 @@ def update_parcel_size():
 
         parcel_size_id = __get_first_dws(result)
 
-        if parcel_size_id:
+        if parcel_size_id is not None:
             order.parcel_size = parcel_size_id
             order.save()
         else:
@@ -187,3 +187,13 @@ def address_verification_to_njv_lm():
         logger.error(f"Error when updating : {orders_success}")
         logger.error(f"Error occurred while updating success orders: {e}")
         raise e
+
+
+def test():
+    order_sv = OrderService(logger)
+    stt_code, result = order_sv.get_events(379114498)
+
+
+    parcel_size_id = __get_first_dws(result)
+
+    print(parcel_size_id)
