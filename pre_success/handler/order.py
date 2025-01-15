@@ -29,6 +29,14 @@ def parcel_sweeper_live(sla_enabled=False):
         if not records:
             logger.warning("No data found in the Google Sheet")
 
+        google_sheetservice = GoogleSheetService(
+            service_account=get_service_account(configs.get('GSA_SYSTEM')),
+            spreadsheet_id='1vX0HS75LLOQaWKGUZVxcExLb2wCYgeWtCFBRozocgYM',
+            logger=logger
+        )
+        overcapacity = google_sheetservice.read_cell('B2', 1030025293)
+        overcapacity_list = list(map(int, overcapacity.split(',')))
+
         # Filter orders that need processing
         orders = Order.objects.filter(
             Q(created_date__date=timezone.now().date()) &
@@ -60,6 +68,10 @@ def parcel_sweeper_live(sla_enabled=False):
 
     # Process each order
     for order in orders:
+        if sla_enabled and order.dest_hub_id not in overcapacity_list and order.project_call in 'Gsheet Breach SLA':
+            logger.info(f"Order {order.tracking_id} is not in overcapacity list")
+            continue
+
         stt_code, result = scanner.parcel_sweeper_live(tracking_id=order.tracking_id, hub_id=order.dest_hub_id)
 
         if stt_code != 200:
