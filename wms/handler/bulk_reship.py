@@ -57,7 +57,7 @@ def wms_bulk_reship():
     success_picked = response_pick.get("success")
     failed_picked = response_pick.get("failed")
     logger.info(f"Pick : Success {len(success_picked)} orders, Failed {len(failed_picked)} orders")
-    
+
     # Create reship session
     code_session, reship_session = wms.create_session(action=WMSAction.reship)
     logger.info(f"Reship's Session created : {reship_session}")
