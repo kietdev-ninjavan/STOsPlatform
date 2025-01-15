@@ -1,9 +1,8 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from random import choice
 from typing import List, Tuple, Dict
 
-from django.utils import timezone
 from requests.exceptions import (
     HTTPError,
     ConnectionError,
@@ -124,7 +123,7 @@ class WMSService(WMSBaseService):
         """
 
         url = f"{self._base_url}/sessions/create"
-        return self.make_request(url, method="POST", payload={"type": action})
+        return self.make_request(url, method="POST", payload={"type": action.action})
 
     @retry(exceptions=(HTTPError, ConnectionError, Timeout, RequestException), tries=3, delay=2, backoff=2, jitter=(1, 3))
     def close_session(self, session_id: int) -> Tuple[int, dict]:
@@ -198,9 +197,9 @@ class WMSService(WMSBaseService):
             {
                 "system_id": "VN",
                 "tracking_id": tracking_id,
-                "pick_action": pick_action.value,
+                "pick_action": pick_action.action,
                 "relabel_tracking_id": "",
-                "picklist_upload_timestamp": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S%SSZ")
+                "picklist_upload_timestamp": datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
             }
             for tracking_id in tracking_ids
         ]
@@ -255,9 +254,9 @@ class WMSService(WMSBaseService):
             else:
                 failed.append(order.get("tracking_id"))
 
-        result = {"sucesss": success, "failed": failed}
+        result = {"success": success, "failed": failed}
 
-        return code, result
+        return 200, result
 
     @retry(exceptions=(HTTPError, ConnectionError, Timeout, RequestException), tries=3, delay=2, backoff=2, jitter=(1, 3))
     def pack_orders(self,
@@ -303,6 +302,6 @@ class WMSService(WMSBaseService):
             else:
                 failed.append(order.get("tracking_id"))
 
-        result = {"sucesss": success, "failed": failed}
+        result = {"success": success, "failed": failed}
 
-        return code, result
+        return 200, result
