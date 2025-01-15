@@ -62,13 +62,13 @@ def wms_relabel():
     logger.info(f"Failed to RELABEL pick {len(failed_picked)} orders")
 
     # Create relabel session
-    code_session, relabel_session = wms.create_session(action=WMSAction.relabel.value)
+    code_session, relabel_session = wms.create_session(action=WMSAction.relabel)
     logger.info(f"Relabel's Session created : {relabel_session}")
 
     # Pack SHEIN orders
     code_pack, response_pack = wms.pack_orders(
         tracking_ids=success_picked,
-        action=WMSAction.relabel.value,
+        action=WMSAction.relabel,
         session=relabel_session
     )
     if code_pack != 200:
