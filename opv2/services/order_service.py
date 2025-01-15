@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import List, Tuple, Union, Dict
 
-import fireducks.pandas as pd
+import pandas as pd
 from django.utils import timezone
 from pandas.core.interchange.dataframe_protocol import DataFrame
 

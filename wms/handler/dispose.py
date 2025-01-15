@@ -57,7 +57,7 @@ def wms_dispose():
     logger.info(f"Failed to DISPOSE pick {len(failed_picked)} orders")
 
     # Create dispose session
-    code_session, dispose_session = wms.create_session(action=WMSAction.dispose.value)
+    code_session, dispose_session = wms.create_session(action=WMSAction.dispose)
     logger.info(f"Dispose's Session created : {dispose_session}")
 
     # Create dispose bag
@@ -67,7 +67,7 @@ def wms_dispose():
     # Pack SHEIN orders
     code_pack, response_pack = wms.pack_orders(
         tracking_ids=success_picked,
-        action=WMSAction.dispose.value,
+        action=WMSAction.dispose,
         session=dispose_session,
         bag=dispose_bag
     )
