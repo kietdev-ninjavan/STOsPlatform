@@ -312,12 +312,13 @@ class GoogleSheetService:
             self.__handle_api_error(error)
 
     @retry(APIError, tries=6, delay=2, backoff=2, jitter=(1, 3))
-    def get_all_records_as_dataframe(self, worksheet: Union[int, str, gspread.Worksheet]) -> pd.DataFrame:
+    def get_all_records_as_dataframe(self, worksheet: Union[int, str, gspread.Worksheet], head_row: int = 1) -> pd.DataFrame:
         """
         Retrieve all records from the worksheet as a pandas DataFrame using gspread-dataframe.
 
         Args:
             worksheet (Union[int, str, gspread.Worksheet]): The worksheet to retrieve records from.
+            head_row (int): The row number to use as the header. Defaults to 1.
 
         Returns:
             pd.DataFrame: A pandas DataFrame containing the records.
@@ -330,7 +331,7 @@ class GoogleSheetService:
 
         try:
             # Retrieve the worksheet's content as a DataFrame
-            df = get_as_dataframe(worksheet, evaluate_formulas=True, header=1)  # Adjust header row as needed
+            df = get_as_dataframe(worksheet, evaluate_formulas=True, header=head_row)  # Adjust header row as needed
             self.__logger.info(f"Retrieved all records as DataFrame from worksheet '{worksheet.title}'.")
             return df
         except APIError as error:

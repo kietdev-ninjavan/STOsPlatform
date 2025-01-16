@@ -5,6 +5,11 @@ from opv2.base.order import GranularStatusChoices
 from opv2.base.ticket import BaseTicket
 
 
+class SelfCollectionChoices(models.TextChoices):
+    TT_DESTROYED_GOODS = 'TT_DESTROYED_GOODS', 'Tiktok Destroyed Goods'
+    SP_DESTROYED_GOODS = 'SP_DESTROYED_GOODS', 'Shopee Destroyed Goods'
+
+
 class TicketChangeDate(BaseTicket):
     created_at = models.DateTimeField(auto_now_add=True)
     comments = models.TextField(null=True, blank=True)
@@ -85,3 +90,16 @@ class TicketMissing(BaseTicket):
     class Meta:
         verbose_name = 'Ticket Missing'
         verbose_name_plural = 'Tickets Missing'
+
+
+class TicketSelfCollection(BaseTicket):
+    type = models.CharField(
+        max_length=255,
+        choices=SelfCollectionChoices.choices,
+        null=True, blank=True
+    )
+    resolve_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = 'Ticket Self Collection'
+        verbose_name_plural = 'Tickets Self Collection'
