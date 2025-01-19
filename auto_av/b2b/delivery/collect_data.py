@@ -4,7 +4,7 @@ from django.db.models import Q
 from django.db.models.functions import Lower
 from simple_history.utils import bulk_create_with_history
 
-from network.models import Zone
+from network.models import Zone, Hub
 from opv2.models import ShipperB2B
 from opv2.services import OrderService
 from ...models import OrderB2B, StageChoices
@@ -18,7 +18,14 @@ def collect_order_av_to_b2b_lm():
 
     order_service = OrderService(logger)
 
-    stt_code, orders = order_service.parcel_address_search(shipper_b2b_ids, df=True)
+    hub_ids = list(Hub.objects.annotate(
+        name_lower=Lower('name')
+    ).filter(
+        name_lower__icontains='b2b'
+    ).values_list('id', flat=True))
+    logger.info(f"Have {len(hub_ids)} Hub b2b")
+
+    stt_code, orders = order_service.parcel_address_search(shipper_b2b_ids, hub_ids, df=True)
 
     if stt_code != 200:
         logger.error(f"Error when get parcel address search: {orders}")

@@ -42,7 +42,7 @@ class TicketDTO:
             created_at=parse_datetime(data.get('createdAt')),
             investigating_hub_id=data.get('investigatingHubId'),
             source_of_entry=data.get('sourceOfEntry'),
-            status=data.get('status'),
+            status=getattr(TicketStatusChoices, data.get('status').replace(' ', '_').upper()),
             type=data.get('ticketTypeId'),
             sub_type=data.get('subTicketTypeId'),
             tracking_id=data.get('trackingId')

@@ -264,7 +264,7 @@ class OrderService(BaseService):
 
         return 200, {'success': success, 'failed': failed}
 
-    def parcel_address_search(self, shipper_ids: List[int], df: bool = False) -> Tuple[int, Union[List[AddressDTO], DataFrame]]:
+    def parcel_address_search(self, shipper_ids: List[int], hub_ids: List[int], df: bool = False) -> Tuple[int, Union[List[AddressDTO], DataFrame]]:
         url = f"{self._base_url}/av/parceladdress/search/paginated"
         payload = {
             'from': 0,
@@ -279,6 +279,7 @@ class OrderService(BaseService):
                 ],
                 'rts': False,
                 # Turn this on when run officially
+                'hub_ids': hub_ids,
                 "global_shipper_ids": shipper_ids,
                 'av_sources': [
                     'Bulk AV',

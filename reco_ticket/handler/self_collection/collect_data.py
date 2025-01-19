@@ -9,6 +9,7 @@ from opv2.services import TicketService
 from stos.utils import configs
 from ...models import TicketSelfCollection, SelfCollectionChoices
 from simple_history.utils import bulk_create_with_history
+
 logger = logging.getLogger(__name__)
 
 
@@ -62,7 +63,8 @@ def collect_data_tt():
 
     if new_tickets:
         try:
-            created = bulk_create_with_history(new_tickets, TicketSelfCollection, batch_size=1000)
+            with transaction.atomic():
+                TicketSelfCollection.objects.bulk_create(new_tickets, batch_size=1000, ignore_conflicts=True)
             logger.info(f"Successfully created {len(new_tickets)} tickets")
         except Exception as e:
             logger.error(f"Error when create ticket self collection: {e}")
